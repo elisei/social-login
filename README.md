@@ -16,7 +16,7 @@ Módulo para login social no Magento 2.
 
 ## Recursos
 
-### Login ou cadastro com:
+### Login ou cadastro com
 
 *   Facebook
 *   Google
