@@ -1,5 +1,9 @@
-# Social Login
+# Social Login 
 Módulo para login social no Magento 2.
+
+![Facebook](view/frontend/web/images/btn-facebook.svg) 
+![Google](view/frontend/web/images/btn-google.svg) 
+![WindowsLive](view/frontend/web/images/btn-windowslive.svg) 
 
 > Estado
 
