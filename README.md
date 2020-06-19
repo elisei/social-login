@@ -12,11 +12,11 @@ Módulo para login social no Magento 2.
 
 > Estatísticas
 
-[![Total Downloads](https://poser.pugx.org/o2ti/social-login/downloads)](https://packagist.org/packages/social-login)
+[![Total Downloads](https://poser.pugx.org/o2ti/social-login/downloads)](//packagist.org/packages/o2ti/social-login)
 
 > Versão
 
-[![Version](https://poser.pugx.org/o2ti/social-login/version)](//packagist.org/packages/o2ti/social-login)
+[![Latest Stable Version](https://poser.pugx.org/o2ti/social-login/v)](//packagist.org/packages/o2ti/social-login)
 
 ## Recursos
 
