@@ -32,7 +32,7 @@ Módulo para login social no Magento 2.
 
 ### Instalação e Configuração
 
-Visite nossa [Wiki](wiki)
+Visite nossa [Wiki](https://github.com/elisei/social-login/wiki)
 
 ## License
 
