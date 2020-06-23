@@ -22,9 +22,7 @@ define(["ko", "uiComponent"], function (ko, Component) {
             }
         };
         getRedirectUrl(provider) {
-            return (
-                window.checkoutConfig.socialLogin.redirectUrl + "provider/" + provider
-            );
+            window.checkoutConfig.socialLogin.redirectUrl + "provider/" + provider;
         };
     });
 });
