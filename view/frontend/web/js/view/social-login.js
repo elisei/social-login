@@ -7,9 +7,9 @@ define(["ko", "uiComponent"], function (ko, Component) {
 
     return Component.extend({
         defaults: {
-            template: "O2TI_SocialLogin/social-login",
-        };
-        isVisible: ko.observable(window.checkoutConfig.socialLogin.enabled);
+            template: "O2TI_SocialLogin/social-login"
+        },
+        isVisible: ko.observable(window.checkoutConfig.socialLogin.enabled),
         isEnabled(provider) {
             if(provider === "facebook"){
                 return window.checkoutConfig.socialLogin.providers.facebook;
@@ -20,9 +20,9 @@ define(["ko", "uiComponent"], function (ko, Component) {
             if(provider === "WindowsLive"){
                 return window.checkoutConfig.socialLogin.providers.WindowsLive;
             }
-        };
+        },
         getRedirectUrl(provider) {
-            window.checkoutConfig.socialLogin.redirectUrl + "provider/" + provider;
-        };
+            return window.checkoutConfig.socialLogin.redirectUrl + "provider/" + provider;
+        }
     });
 });
