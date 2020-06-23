@@ -267,8 +267,6 @@ class Provider
      */
     public function setAutenticateAndReferer($provider, $isSecure = 1, $referer = null)
     {
-        
-
         if ($referer) {
             $metadata = $this->cookieMetadataFactory
                         ->createPublicCookieMetadata()
