@@ -24,7 +24,6 @@ use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
-
 class Provider
 {
     const CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED = 'social_login/%s/enabled';
@@ -208,9 +207,10 @@ class Provider
     }
 
     /**
-     * Retrieve cookie manager
+     * Retrieve cookie manager.
      *
      * @deprecated 100.1.0
+     *
      * @return \Magento\Framework\Stdlib\Cookie\PhpCookieManager
      */
     private function getCookieManager()
@@ -220,13 +220,15 @@ class Provider
                 \Magento\Framework\Stdlib\Cookie\PhpCookieManager::class
             );
         }
+
         return $this->cookieMetadataManager;
     }
 
     /**
-     * Retrieve cookie metadata factory
+     * Retrieve cookie metadata factory.
      *
      * @deprecated 100.1.0
+     *
      * @return \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory
      */
     private function getCookieMetadataFactory()
@@ -236,6 +238,7 @@ class Provider
                 \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory::class
             );
         }
+
         return $this->cookieMetadataFactory;
     }
 
@@ -270,8 +273,6 @@ class Provider
         $customer = $this->customerFactory->create();
         $customer->setWebsiteId($websiteId);
         $customer->loadByEmail($socialProfile->email);
-        
-        
 
         if (!$customer->getId()) {
             $customer->setData('email', $socialProfile->email);
@@ -308,7 +309,6 @@ class Provider
                 $metadata->setPath('/');
                 $this->getCookieManager()->deleteCookie('mage-cache-sessid', $metadata);
             }
-
         }
     }
 
