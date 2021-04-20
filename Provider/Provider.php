@@ -8,6 +8,7 @@ namespace O2TI\SocialLogin\Provider;
 
 use Hybridauth\HybridauthFactory;
 use Hybridauth\User\Profile as SocialProfile;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Account\Redirect as AccountRedirect;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\CustomerFactory;
@@ -22,6 +23,7 @@ use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+
 
 class Provider
 {
@@ -38,6 +40,11 @@ class Provider
         'google',
         'WindowsLive',
     ];
+
+    /**
+     * @var \Magento\Customer\Api\CustomerRepositoryInterface
+     */
+    protected $customerRepository;
 
     /**
      * @var CustomerFactory
@@ -85,9 +92,14 @@ class Provider
     private $cookieManager;
 
     /**
-     * @var CookieMetadataFactory
+     * @var \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory
      */
     private $cookieMetadataFactory;
+
+    /**
+     * @var \Magento\Framework\Stdlib\Cookie\PhpCookieManager
+     */
+    private $cookieMetadataManager;
 
     /**
      * @var SessionManagerInterface
@@ -116,7 +128,8 @@ class Provider
         ScopeConfigInterface $scopeConfig,
         CookieManagerInterface $cookieManager = null,
         CookieMetadataFactory $cookieMetadataFactory = null,
-        SessionManagerInterface $sessionManager
+        SessionManagerInterface $sessionManager,
+        CustomerRepositoryInterface $customerRepository
     ) {
         $this->hybridauthFactory = $hybridauthFactory;
         $this->customerFactory = $customerFactory;
@@ -130,6 +143,7 @@ class Provider
         $this->cookieMetadataFactory = $cookieMetadataFactory ?:
             ObjectManager::getInstance()->get(CookieMetadataFactory::class);
         $this->sessionManager = $sessionManager;
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -194,6 +208,38 @@ class Provider
     }
 
     /**
+     * Retrieve cookie manager
+     *
+     * @deprecated 100.1.0
+     * @return \Magento\Framework\Stdlib\Cookie\PhpCookieManager
+     */
+    private function getCookieManager()
+    {
+        if (!$this->cookieMetadataManager) {
+            $this->cookieMetadataManager = \Magento\Framework\App\ObjectManager::getInstance()->get(
+                \Magento\Framework\Stdlib\Cookie\PhpCookieManager::class
+            );
+        }
+        return $this->cookieMetadataManager;
+    }
+
+    /**
+     * Retrieve cookie metadata factory
+     *
+     * @deprecated 100.1.0
+     * @return \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory
+     */
+    private function getCookieMetadataFactory()
+    {
+        if (!$this->cookieMetadataFactory) {
+            $this->cookieMetadataFactory = \Magento\Framework\App\ObjectManager::getInstance()->get(
+                \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory::class
+            );
+        }
+        return $this->cookieMetadataFactory;
+    }
+
+    /**
      * Gets customer data for a hybrid auth profile.
      *
      * @param SocialProfile $profile
@@ -224,6 +270,9 @@ class Provider
         $customer = $this->customerFactory->create();
         $customer->setWebsiteId($websiteId);
         $customer->loadByEmail($socialProfile->email);
+        
+        
+
         if (!$customer->getId()) {
             $customer->setData('email', $socialProfile->email);
             $customer->addData($this->getCustomerData($socialProfile));
@@ -252,7 +301,14 @@ class Provider
         if ($authenticate->isConnected()) {
             $socialProfile = $authenticate->getUserProfile();
             $customer = $this->setCustomerData($socialProfile);
-            $this->customerSession->setCustomerAsLoggedIn($customer);
+            $this->customerSession->setCustomerDataAsLoggedIn($customer);
+
+            if ($this->getCookieManager()->getCookie('mage-cache-sessid')) {
+                $metadata = $this->getCookieMetadataFactory()->createCookieMetadata();
+                $metadata->setPath('/');
+                $this->getCookieManager()->deleteCookie('mage-cache-sessid', $metadata);
+            }
+
         }
     }
 
@@ -295,6 +351,16 @@ class Provider
             $socialProfile = $authenticate->getUserProfile();
             $customer = $this->setCustomerData($socialProfile);
             $this->customerSession->setCustomerAsLoggedIn($customer);
+            $this->customerSession->getCustomerFormData(true);
+            $customerId = $this->customerSession->getCustomerId();
+            $customerDataObject = $this->customerRepository->getById($customerId);
+
+            $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
+            if ($this->getCookieManager()->getCookie('mage-cache-sessid')) {
+                $metadata = $this->getCookieMetadataFactory()->createCookieMetadata();
+                $metadata->setPath('/');
+                $this->getCookieManager()->deleteCookie('mage-cache-sessid', $metadata);
+            }
             $response['redirectUrl'] = $this->cookieManager->getCookie(self::COOKIE_NAME);
         }
 
