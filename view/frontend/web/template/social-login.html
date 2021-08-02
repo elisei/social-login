@@ -8,13 +8,13 @@
 <form class="form social-login"  method="post">
     <ul class="social-login">
     	<li data-bind="visible: isEnabled('google')">
-    		<button type="submit" data-bind="attr: { formaction: getRedirectUrl('google') }" class="button btn-social-link btn-google"><span><span>Continue com Google</span></span></button>
+    		<button type="submit" data-bind="attr: { formaction: getRedirectUrl('google') }" class="button btn-social-link btn-google" rel="noopener noreferrer nofollow" ><span><span>Continue com Google</span></span></button>
     	</li>
         <li data-bind="visible: isEnabled('facebook')">
-        	<button type="submit" data-bind="attr: { formaction: getRedirectUrl('facebook') }" class="button btn-social-link btn-facebook"><span><span>Continue com Facebook</span></span></button>
+        	<button type="submit" data-bind="attr: { formaction: getRedirectUrl('facebook') }" class="button btn-social-link btn-facebook" rel="noopener noreferrer nofollow" ><span><span>Continue com Facebook</span></span></button>
         </li>
         <li data-bind="visible: isEnabled('WindowsLive')">
-        	<button type="submit" data-bind="attr: { formaction: getRedirectUrl('WindowsLive') }" class="button btn-social-link btn-windowslive"><span><span>Continue com Microsoft Live</span></span></button>
+        	<button type="submit" data-bind="attr: { formaction: getRedirectUrl('WindowsLive') }" class="button btn-social-link btn-windowslive" rel="noopener noreferrer nofollow" ><span><span>Continue com Microsoft Live</span></span></button>
         </li>
     </ul>
 </form>

@@ -6,6 +6,7 @@
 
 namespace O2TI\SocialLogin\Provider;
 
+use Exception;
 use Hybridauth\HybridauthFactory;
 use Hybridauth\User\Profile as SocialProfile;
 use Magento\Customer\Api\CustomerRepositoryInterface;
@@ -23,13 +24,14 @@ use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Message\ManagerInterface;
 
 class Provider
 {
     const CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED = 'social_login/%s/enabled';
     const CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_KEY = 'social_login/%s/api_key';
     const CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_SECRET = 'social_login/%s/api_secret';
-    const COOKIE_NAME = 'social_login_redirect';
+    const COOKIE_NAME = 'login_redirect';
 
     /**
      * The providers we currently support.
@@ -37,7 +39,7 @@ class Provider
     const PROVIDERS = [
         'facebook',
         'google',
-        'WindowsLive',
+        'WindowsLive'
     ];
 
     /**
@@ -106,6 +108,12 @@ class Provider
     private $sessionManager;
 
     /**
+     * @var ManagerInterface
+     */
+    private $messageManager;
+
+
+    /**
      * @param HybridauthFactory       $hybridauthFactory
      * @param UrlInterface            $url
      * @param CustomerFactory         $customerFactory
@@ -116,6 +124,7 @@ class Provider
      * @param CookieManagerInterface  $cookieManager
      * @param CookieMetadataFactory   $cookieMetadataFactory
      * @param SessionManagerInterface $sessionManager
+     * @param ManagerInterface        $messageManager
      */
     public function __construct(
         HybridauthFactory $hybridauthFactory,
@@ -128,7 +137,9 @@ class Provider
         CookieManagerInterface $cookieManager = null,
         CookieMetadataFactory $cookieMetadataFactory = null,
         SessionManagerInterface $sessionManager,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        ManagerInterface $messageManager,
+        AccountRedirect $accountRedirect
     ) {
         $this->hybridauthFactory = $hybridauthFactory;
         $this->customerFactory = $customerFactory;
@@ -143,23 +154,13 @@ class Provider
             ObjectManager::getInstance()->get(CookieMetadataFactory::class);
         $this->sessionManager = $sessionManager;
         $this->customerRepository = $customerRepository;
+        $this->messageManager = $messageManager;
+        $this->accountRedirect = $accountRedirect ?: ObjectManager::getInstance()->get(AccountRedirect::class);
     }
 
-    /**
-     * Get account redirect.
-     *
-     * @deprecated 100.0.10
-     *
-     * @return AccountRedirect
-     */
-    protected function getAccountRedirect()
-    {
-        if (!is_object($this->accountRedirect)) {
-            $this->accountRedirect = ObjectManager::getInstance()->get(AccountRedirect::class);
-        }
+    
 
-        return $this->accountRedirect;
-    }
+
 
     /**
      * Configs.
@@ -272,14 +273,15 @@ class Provider
         $websiteId = $this->storeManager->getWebsite()->getId();
         $customer = $this->customerFactory->create();
         $customer->setWebsiteId($websiteId);
-        $customer->loadByEmail($socialProfile->email);
+        if($socialProfile->email) {
+            $customer->loadByEmail($socialProfile->email);
 
-        if (!$customer->getId()) {
-            $customer->setData('email', $socialProfile->email);
-            $customer->addData($this->getCustomerData($socialProfile));
-            $this->customerResource->save($customer);
+            if (!$customer->getId()) {
+                $customer->setData('email', $socialProfile->email);
+                $customer->addData($this->getCustomerData($socialProfile));
+                $this->customerResource->save($customer);
+            }
         }
-
         return $customer;
     }
 
@@ -323,20 +325,15 @@ class Provider
      */
     public function setAutenticateAndReferer($provider, $isSecure = 1, $referer = null)
     {
+        
         if ($referer) {
-            $metadata = $this->cookieMetadataFactory
-                        ->createPublicCookieMetadata()
-                        ->setDuration(86400)
-                        ->setPath($this->sessionManager->getCookiePath())
-                        ->setSecure($isSecure)
-                        ->setHttpOnly(true)
-                        ->setDomain($this->sessionManager->getCookieDomain());
-            $this->cookieManager->setPublicCookie(
-                self::COOKIE_NAME,
-                $referer,
-                $metadata
-            );
+            $this->accountRedirect->setRedirectCookie($referer);
         }
+
+        $redirect = $this->accountRedirect->getRedirectCookie();
+
+        $response['redirectUrl'] = $redirect;
+
 
         $hybridAuth = $this->hybridauthFactory->create([
             'config' => [
@@ -345,39 +342,34 @@ class Provider
             ],
         ]);
 
-        $authenticate = $hybridAuth->authenticate($provider);
+        try {
+            $authenticate = $hybridAuth->authenticate($provider);
+        } catch (Exception $e) {
+            $this->messageManager->addError(__("Unable to login, try another way."));
+            return $response;
+        }
 
         if ($authenticate->isConnected()) {
             $socialProfile = $authenticate->getUserProfile();
             $customer = $this->setCustomerData($socialProfile);
-            $this->customerSession->setCustomerAsLoggedIn($customer);
-            $this->customerSession->getCustomerFormData(true);
-            $customerId = $this->customerSession->getCustomerId();
-            $customerDataObject = $this->customerRepository->getById($customerId);
+            if($customer->getId()){
+                $this->customerSession->setCustomerAsLoggedIn($customer);
+                $this->customerSession->getCustomerFormData(true);
+                $customerId = $this->customerSession->getCustomerId();
+                $customerDataObject = $this->customerRepository->getById($customerId);
 
-            $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
-            if ($this->getCookieManager()->getCookie('mage-cache-sessid')) {
-                $metadata = $this->getCookieMetadataFactory()->createCookieMetadata();
-                $metadata->setPath('/');
-                $this->getCookieManager()->deleteCookie('mage-cache-sessid', $metadata);
+                $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
+                
+                if ($this->getCookieManager()->getCookie('mage-cache-sessid')) {
+                    $metadata = $this->getCookieMetadataFactory()->createCookieMetadata();
+                    $metadata->setPath('/');
+                    $this->getCookieManager()->deleteCookie('mage-cache-sessid', $metadata);
+                }
+                return $response;
             }
-            $response['redirectUrl'] = $this->cookieManager->getCookie(self::COOKIE_NAME);
+
+            $this->messageManager->addError(__("Unable to login, try another way."));
+            return $response;
         }
-
-        return $response;
-    }
-
-    /**
-     * Account redirect setter for unit tests.
-     *
-     * @deprecated 100.0.10
-     *
-     * @param AccountRedirect $value
-     *
-     * @return void
-     */
-    public function setAccountRedirect($value)
-    {
-        $this->accountRedirect = $value;
     }
 }

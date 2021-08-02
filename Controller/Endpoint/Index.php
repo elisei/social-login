@@ -50,8 +50,9 @@ class Index extends Action
         $provider = $this->_request->getParam('provider');
         $isSecure = $this->_request->isSecure();
         $referer = $this->_request->getParam('referer');
-        $response = $this->provider->setAutenticateAndReferer($provider, $isSecure, $referer);
 
+        $response = $this->provider->setAutenticateAndReferer($provider, $isSecure, $referer);
+       
         return $this->_redirect($this->urlDecoder->decode($response['redirectUrl']));
     }
 }
