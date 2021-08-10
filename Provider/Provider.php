@@ -18,13 +18,13 @@ use Magento\Customer\Model\Session\Proxy as CustomerSession;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Session\SessionManagerInterface;
 use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
 use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Message\ManagerInterface;
 
 class Provider
 {
@@ -39,7 +39,7 @@ class Provider
     const PROVIDERS = [
         'facebook',
         'google',
-        'WindowsLive',
+        'WindowsLive'
     ];
 
     /**
@@ -112,6 +112,7 @@ class Provider
      */
     private $messageManager;
 
+
     /**
      * @param HybridauthFactory       $hybridauthFactory
      * @param UrlInterface            $url
@@ -156,6 +157,10 @@ class Provider
         $this->messageManager = $messageManager;
         $this->accountRedirect = $accountRedirect ?: ObjectManager::getInstance()->get(AccountRedirect::class);
     }
+
+    
+
+
 
     /**
      * Configs.
@@ -268,7 +273,7 @@ class Provider
         $websiteId = $this->storeManager->getWebsite()->getId();
         $customer = $this->customerFactory->create();
         $customer->setWebsiteId($websiteId);
-        if ($socialProfile->email) {
+        if($socialProfile->email) {
             $customer->loadByEmail($socialProfile->email);
 
             if (!$customer->getId()) {
@@ -277,7 +282,6 @@ class Provider
                 $this->customerResource->save($customer);
             }
         }
-
         return $customer;
     }
 
@@ -321,6 +325,7 @@ class Provider
      */
     public function setAutenticateAndReferer($provider, $isSecure = 1, $referer = null)
     {
+        
         if ($referer) {
             $this->accountRedirect->setRedirectCookie($referer);
         }
@@ -328,6 +333,7 @@ class Provider
         $redirect = $this->accountRedirect->getRedirectCookie();
 
         $response['redirectUrl'] = $redirect;
+
 
         $hybridAuth = $this->hybridauthFactory->create([
             'config' => [
@@ -339,33 +345,30 @@ class Provider
         try {
             $authenticate = $hybridAuth->authenticate($provider);
         } catch (Exception $e) {
-            $this->messageManager->addError(__('Unable to login, try another way.'));
-
+            $this->messageManager->addError(__("Unable to login, try another way."));
             return $response;
         }
 
         if ($authenticate->isConnected()) {
             $socialProfile = $authenticate->getUserProfile();
             $customer = $this->setCustomerData($socialProfile);
-            if ($customer->getId()) {
+            if($customer->getId()){
                 $this->customerSession->setCustomerAsLoggedIn($customer);
                 $this->customerSession->getCustomerFormData(true);
                 $customerId = $this->customerSession->getCustomerId();
                 $customerDataObject = $this->customerRepository->getById($customerId);
 
                 $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
-
+                
                 if ($this->getCookieManager()->getCookie('mage-cache-sessid')) {
                     $metadata = $this->getCookieMetadataFactory()->createCookieMetadata();
                     $metadata->setPath('/');
                     $this->getCookieManager()->deleteCookie('mage-cache-sessid', $metadata);
                 }
-
                 return $response;
             }
 
-            $this->messageManager->addError(__('Unable to login, try another way.'));
-
+            $this->messageManager->addError(__("Unable to login, try another way."));
             return $response;
         }
     }
