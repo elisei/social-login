@@ -243,7 +243,7 @@ class Provider
             if (!$customer->getId()) {
                 $customer->setData('email', $socialProfile->email);
                 $customer->addData($this->getCustomerData($socialProfile));
-                
+
                 try {
                     $customer = $this->customerResource->save($customer);
                 } catch (Exception $exc) {
