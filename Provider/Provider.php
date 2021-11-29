@@ -158,7 +158,6 @@ class Provider
         $this->customerRepository = $customerRepository;
         $this->messageManager = $messageManager;
         $this->accountRedirect = $accountRedirect ?: ObjectManager::getInstance()->get(AccountRedirect::class);
-        
     }
 
     /**

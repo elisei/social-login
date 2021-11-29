@@ -107,7 +107,7 @@ class CheckoutConfigProvider implements ConfigProviderInterface
             sprintf(Provider::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED, $provider),
             ScopeInterface::SCOPE_STORE
         );
-    }    
+    }
 
     /**
      * Configs.
