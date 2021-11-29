@@ -19,5 +19,4 @@ cache:
     - $HOME/.composer/cache
 
 script:
-  - vendor/bin/phpcs --config-set installed_paths vendor/magento/magento-coding-standard/
   - vendor/bin/phpcs --standard=vendor/magento/magento-coding-standard/Magento2 --ignore=vendor ./
