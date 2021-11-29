@@ -107,7 +107,7 @@ class CheckoutConfigProvider implements ConfigProviderInterface
             sprintf(Provider::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED, $provider),
             ScopeInterface::SCOPE_STORE
         );
-    }    
+    }
 
     /**
      * Configs.
@@ -132,7 +132,7 @@ class CheckoutConfigProvider implements ConfigProviderInterface
 
         return [
             'socialLogin' => [
-                'enabled' => (bool) $this->isEnabled(),
+                'enabled'               => (bool) $this->isEnabled(),
                 'redirectUrl'           => $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params),
                 'providers'             => [
                     'facebook'      => $this->isProviderEnabled('facebook'),
