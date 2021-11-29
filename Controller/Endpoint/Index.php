@@ -27,7 +27,7 @@ class Index extends Action
      * Construct.
      *
      * @param Context          $context
-     * @param Provider         $Provider
+     * @param Provider         $provider
      * @param DecoderInterface $urlDecoder
      */
     public function __construct(

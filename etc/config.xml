@@ -8,15 +8,9 @@
 <config>
     <default>
         <social_login>
-            <facebook>
-                <sort_order>1</sort_order>
-            </facebook>
-            <google>
-                <sort_order>2</sort_order>
-            </google>
-            <windowslive>
-                <sort_order>3</sort_order>
-            </windowslive>
+            <general>
+                <enabled>0</enabled>
+            </general>
         </social_login>
     </default>
 </config>

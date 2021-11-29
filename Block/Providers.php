@@ -21,12 +21,12 @@ class Providers extends Template
     /**
      * Query param name for last url visited.
      */
-    const REFERER_QUERY_PARAM_NAME = 'referer';
+    public const REFERER_QUERY_PARAM_NAME = 'referer';
 
     /**
      * Module is Enabled.
      */
-    const CONFIG_PATH_SOCIAL_LOGIN_ENABLED = 'social_login/config/enabled';
+    public const CONFIG_PATH_SOCIAL_LOGIN_ENABLED = 'social_login/config/enabled';
 
     /**
      * @var ScopeConfigInterface
@@ -68,6 +68,7 @@ class Providers extends Template
      * @param EncoderInterface     $urlEncoder
      * @param DecoderInterface     $urlDecoder
      * @param HostChecker          $hostChecker
+     * @param array                $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,

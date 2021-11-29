@@ -21,17 +21,12 @@ class CheckoutConfigProvider implements ConfigProviderInterface
     /**
      * Query param name for last url visited.
      */
-    const REFERER_QUERY_PARAM_NAME = 'referer';
-
-    /**
-     * Module is Enabled.
-     */
-    const CONFIG_PATH_SOCIAL_LOGIN_ENABLED = 'social_login/config/enabled';
+    public const REFERER_QUERY_PARAM_NAME = 'referer';
 
     /**
      * @var ScopeConfigInterface
      */
-    private $scopeConfig;
+    protected $scopeConfig;
 
     /**
      * @var RequestInterface
@@ -54,7 +49,7 @@ class CheckoutConfigProvider implements ConfigProviderInterface
     private $urlDecoder;
 
     /**
-     * HostChecker.
+     * @var HostChecker
      */
     private $hostChecker;
 
@@ -63,7 +58,7 @@ class CheckoutConfigProvider implements ConfigProviderInterface
      *
      * @param ScopeConfigInterface $scopeConfig
      * @param RequestInterface     $request
-     * @param UrlInterface         $url
+     * @param UrlInterface         $urlBuilder
      * @param EncoderInterface     $urlEncoder
      * @param DecoderInterface     $urlDecoder
      * @param HostChecker          $hostChecker
@@ -87,19 +82,32 @@ class CheckoutConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Enabled.
+     * Module is Enabled.
+     *
+     * @return bool
+     */
+    private function isEnabled()
+    {
+        return (bool) $this->scopeConfig->getValue(
+            sprintf(Provider::CONFIG_PATH_SOCIAL_LOGIN_ENABLED),
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Provider is Enabled.
      *
      * @param string $provider
      *
      * @return bool
      */
-    private function isEnabled($provider)
+    private function isProviderEnabled($provider)
     {
         return (bool) $this->scopeConfig->getValue(
             sprintf(Provider::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED, $provider),
             ScopeInterface::SCOPE_STORE
         );
-    }
+    }    
 
     /**
      * Configs.
@@ -124,15 +132,12 @@ class CheckoutConfigProvider implements ConfigProviderInterface
 
         return [
             'socialLogin' => [
-                'enabled' => (bool) $this->scopeConfig->getValue(
-                    self::CONFIG_PATH_SOCIAL_LOGIN_ENABLED,
-                    ScopeInterface::SCOPE_STORE
-                ),
+                'enabled' => (bool) $this->isEnabled(),
                 'redirectUrl'           => $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params),
                 'providers'             => [
-                    'facebook'      => $this->isEnabled('facebook'),
-                    'google'        => $this->isEnabled('google'),
-                    'WindowsLive'   => $this->isEnabled('WindowsLive'),
+                    'facebook'      => $this->isProviderEnabled('facebook'),
+                    'google'        => $this->isProviderEnabled('google'),
+                    'WindowsLive'   => $this->isProviderEnabled('WindowsLive'),
                 ],
             ],
         ];

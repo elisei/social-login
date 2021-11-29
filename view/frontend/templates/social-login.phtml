@@ -9,7 +9,7 @@
                  "providers": {
                     "component": "O2TI_SocialLogin/js/view/buttons",
                     "template": "O2TI_SocialLogin/social-login",
-                    "data": <?= /* @escapeNotVerified */  json_encode($block->getSocialConfig()) ?>
+                    "data": <?= /* @noEscape */  json_encode($block->getSocialConfig()) ?>
                  }
              }
          }
