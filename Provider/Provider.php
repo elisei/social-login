@@ -382,6 +382,7 @@ class Provider
             $authenticate = $hybridAuth->authenticate($provider);
         } catch (Exception $e) {
             $this->messageManager->addError(__('Unable to login, try another way.'));
+
             return $response;
         }
 
@@ -389,7 +390,6 @@ class Provider
             $socialProfile = $authenticate->getUserProfile();
             $customer = $this->setCustomerData($socialProfile);
             if ($customer->getId()) {
-               
                 $this->customerSession->getCustomerFormData(true);
                 $customerId = $this->customerSession->getCustomerId();
                 $customerDataObject = $this->customerRepository->getById($customer->getId());
