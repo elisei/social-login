@@ -1,4 +1,5 @@
 # Social Login 
+
 Módulo para login social no Magento 2.
 
 ![Facebook](view/frontend/web/images/btn-facebook.svg) 
