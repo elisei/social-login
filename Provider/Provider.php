@@ -9,12 +9,15 @@ namespace O2TI\SocialLogin\Provider;
 use Exception;
 use Hybridauth\HybridauthFactory;
 use Hybridauth\User\Profile as SocialProfile;
+use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Customer\Model\Account\Redirect as AccountRedirect;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Customer\Model\ResourceModel\Customer as CustomerResource;
 use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Customer\Model\Url as CustomerUrl;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
@@ -57,6 +60,21 @@ class Provider
      * @var UrlInterface
      */
     private $url;
+
+    /**
+     * @var AccountManagementInterface
+     */
+    protected $accountManagement;
+
+    /**
+     * @var CustomerUrl
+     */
+    protected $customerUrl;
+
+    /**
+     * @var CustomerInterfaceFactory
+     */
+    protected $customerDataFactory;
 
     /**
      * @var CustomerFactory
@@ -116,6 +134,9 @@ class Provider
     /**
      * @param HybridauthFactory           $hybridauthFactory
      * @param UrlInterface                $url
+     * @param AccountManagementInterface  $accountManagement
+     * @param CustomerUrl                 $customerUrl
+     * @param CustomerInterfaceFactory    $customerDataFactory
      * @param CustomerFactory             $customerFactory
      * @param CustomerResource            $customerResource
      * @param CustomerSession|null        $customerSession
@@ -131,6 +152,9 @@ class Provider
     public function __construct(
         HybridauthFactory $hybridauthFactory,
         UrlInterface $url,
+        AccountManagementInterface $accountManagement,
+        CustomerUrl $customerUrl,
+        CustomerInterfaceFactory $customerDataFactory,
         CustomerFactory $customerFactory,
         CustomerResource $customerResource,
         ?CustomerSession $customerSession = null,
@@ -145,6 +169,9 @@ class Provider
     ) {
         $this->hybridauthFactory = $hybridauthFactory;
         $this->url = $url;
+        $this->accountManagement = $accountManagement;
+        $this->customerUrl = $customerUrl;
+        $this->customerDataFactory = $customerDataFactory;
         $this->customerFactory = $customerFactory;
         $this->customerResource = $customerResource;
         $this->customerSession = $customerSession ?? ObjectManager::getInstance()->get(CustomerSession::class);
@@ -212,9 +239,9 @@ class Provider
      *
      * @param SocialProfile $profile
      *
-     * @return array
+     * @return CustomerFactory
      */
-    private function getCustomerData(SocialProfile $profile): array
+    private function getCustomerData(SocialProfile $profile)
     {
         $customerData = [];
         foreach (['firstName', 'lastName', 'email'] as $field) {
@@ -222,7 +249,16 @@ class Provider
             $customerData[strtolower($field)] = $data !== null ? $data : '-';
         }
 
-        return $customerData;
+        $customer = $this->customerDataFactory->create();
+        $customer->setEmail($customerData['email']);
+        $customer->setFirstname($customerData['firstname']);
+        $customer->setLastname($customerData['lastname']);
+        $storeId = $this->storeManager->getStore()->getId();
+        $customer->setStoreId($storeId);
+        $websiteId = $this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
+        $customer->setWebsiteId($websiteId);
+
+        return $customer;
     }
 
     /**
@@ -239,20 +275,47 @@ class Provider
         $customer->setWebsiteId($websiteId);
         if ($socialProfile->email) {
             $customer->loadByEmail($socialProfile->email);
-
             if (!$customer->getId()) {
-                $customer->setData('email', $socialProfile->email);
-                $customer->addData($this->getCustomerData($socialProfile));
-
-                try {
-                    $customer = $this->customerResource->save($customer);
-                } catch (Exception $exc) {
-                    $this->messageManager->addError(__('Unable to create account.'));
-                    $this->messageManager->addError(__($exc->getMessage()));
-
-                    return $customer;
-                }
+                $customer = $this->getCustomerData($socialProfile);
+                $customer = $this->createNewAccount($customer);
             }
+        }
+
+        return $customer;
+    }
+
+    /**
+     * Create New Account.
+     *
+     * @param CustomerFactory $customer
+     *
+     * @return CustomerFactory
+     */
+    public function createNewAccount($customer)
+    {
+        try {
+            $customer = $this->accountManagement
+                ->createAccount($customer);
+
+            $confirmationStatus = $this->accountManagement->getConfirmationStatus($customer->getId());
+            if ($confirmationStatus === AccountManagementInterface::ACCOUNT_CONFIRMATION_REQUIRED) {
+                $this->messageManager->addComplexSuccessMessage(
+                    'checkoutConfirmAccountSuccessMessage',
+                    [
+                        'url' => $this->customerUrl->getEmailConfirmationUrl($customer->getEmail()),
+                    ]
+                );
+            } else {
+                $this->customerSession->setCustomerDataAsLoggedIn($customer);
+            }
+            if ($this->cookieManager->getCookie('mage-cache-sessid')) {
+                $metadata = $this->cookieMetadataFactory->createCookieMetadata();
+                $metadata->setPath('/');
+                $this->cookieManager->deleteCookie('mage-cache-sessid', $metadata);
+            }
+        } catch (\Exception $exc) {
+            $this->messageManager->addError(__('Unable to create account.'));
+            $this->messageManager->addError(__($exc->getMessage()));
         }
 
         return $customer;
@@ -319,7 +382,6 @@ class Provider
             $authenticate = $hybridAuth->authenticate($provider);
         } catch (Exception $e) {
             $this->messageManager->addError(__('Unable to login, try another way.'));
-
             return $response;
         }
 
@@ -327,10 +389,10 @@ class Provider
             $socialProfile = $authenticate->getUserProfile();
             $customer = $this->setCustomerData($socialProfile);
             if ($customer->getId()) {
-                $this->customerSession->setCustomerAsLoggedIn($customer);
+               
                 $this->customerSession->getCustomerFormData(true);
                 $customerId = $this->customerSession->getCustomerId();
-                $customerDataObject = $this->customerRepository->getById($customerId);
+                $customerDataObject = $this->customerRepository->getById($customer->getId());
 
                 $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
 
