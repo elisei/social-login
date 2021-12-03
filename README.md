@@ -10,6 +10,7 @@ Módulo para login social no Magento 2.
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/98f45aff47c44307baf8c913b41d5d2f)](https://www.codacy.com/manual/elisei/social-login?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=elisei/social-login&amp;utm_campaign=Badge_Grade)
 [![StyleCI](https://styleci.io/repos/273519578/shield)](https://styleci.io/repos/273519578)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/elisei/social-login/badges/quality-score.png?b=Magento%402.4)](https://scrutinizer-ci.com/g/elisei/social-login/)
 [![Build Status](https://app.travis-ci.com/elisei/social-login.svg?branch=Magento%402.4)](https://app.travis-ci.com/elisei/social-login)
 
 > Estatísticas
