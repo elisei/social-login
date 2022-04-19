@@ -139,15 +139,15 @@ class Provider
      * @param CustomerInterfaceFactory    $customerDataFactory
      * @param CustomerFactory             $customerFactory
      * @param CustomerResource            $customerResource
-     * @param CustomerSession|null        $customerSession
      * @param StoreManagerInterface       $storeManager
      * @param ScopeConfigInterface        $scopeConfig
-     * @param CookieManagerInterface      $cookieManager
-     * @param CookieMetadataFactory       $cookieMetadataFactory
      * @param SessionManagerInterface     $sessionManager
      * @param CustomerRepositoryInterface $customerRepository
      * @param ManagerInterface            $messageManager
      * @param AccountRedirect             $accountRedirect
+     * @param CustomerSession|null        $customerSession
+     * @param CookieManagerInterface      $cookieManager
+     * @param CookieMetadataFactory       $cookieMetadataFactory
      */
     public function __construct(
         HybridauthFactory $hybridauthFactory,
@@ -157,15 +157,15 @@ class Provider
         CustomerInterfaceFactory $customerDataFactory,
         CustomerFactory $customerFactory,
         CustomerResource $customerResource,
-        ?CustomerSession $customerSession = null,
         StoreManagerInterface $storeManager,
         ScopeConfigInterface $scopeConfig,
-        CookieManagerInterface $cookieManager = null,
-        CookieMetadataFactory $cookieMetadataFactory = null,
         SessionManagerInterface $sessionManager,
         CustomerRepositoryInterface $customerRepository,
         ManagerInterface $messageManager,
-        AccountRedirect $accountRedirect
+        AccountRedirect $accountRedirect,
+        ?CustomerSession $customerSession = null,
+        CookieManagerInterface $cookieManager = null,
+        CookieMetadataFactory $cookieMetadataFactory = null
     ) {
         $this->hybridauthFactory = $hybridauthFactory;
         $this->url = $url;
