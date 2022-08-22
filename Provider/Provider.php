@@ -305,13 +305,6 @@ class Provider
                         'url' => $this->customerUrl->getEmailConfirmationUrl($customer->getEmail()),
                     ]
                 );
-            } else {
-                $this->customerSession->setCustomerDataAsLoggedIn($customer);
-            }
-            if ($this->cookieManager->getCookie('mage-cache-sessid')) {
-                $metadata = $this->cookieMetadataFactory->createCookieMetadata();
-                $metadata->setPath('/');
-                $this->cookieManager->deleteCookie('mage-cache-sessid', $metadata);
             }
         } catch (\Exception $exc) {
             $this->messageManager->addError(__('Unable to create account.'));
@@ -342,13 +335,6 @@ class Provider
         if ($authenticate->isConnected()) {
             $socialProfile = $authenticate->getUserProfile();
             $customer = $this->setCustomerData($socialProfile);
-            $this->customerSession->setCustomerDataAsLoggedIn($customer);
-
-            if ($this->cookieManager->getCookie('mage-cache-sessid')) {
-                $metadata = $this->cookieMetadataFactory->createCookieMetadata();
-                $metadata->setPath('/');
-                $this->cookieManager->deleteCookie('mage-cache-sessid', $metadata);
-            }
         }
     }
 
@@ -390,18 +376,20 @@ class Provider
             $socialProfile = $authenticate->getUserProfile();
             $customer = $this->setCustomerData($socialProfile);
             if ($customer->getId()) {
-                $this->customerSession->getCustomerFormData(true);
-                $customerId = $this->customerSession->getCustomerId();
                 $customerDataObject = $this->customerRepository->getById($customer->getId());
+                try {
+                    $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
 
-                $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
+                    if ($this->cookieManager->getCookie('mage-cache-sessid') &&
+                        $this->customerSession->getCustomerId()) {
+                        $metadata = $this->cookieMetadataFactory->createCookieMetadata();
+                        $metadata->setPath('/');
+                        $this->cookieManager->deleteCookie('mage-cache-sessid', $metadata);
+                    }
 
-                if ($this->cookieManager->getCookie('mage-cache-sessid')) {
-                    $metadata = $this->cookieMetadataFactory->createCookieMetadata();
-                    $metadata->setPath('/');
-                    $this->cookieManager->deleteCookie('mage-cache-sessid', $metadata);
+                } catch (\Exception $exc) {
+                    $this->messageManager->addError($exc->getMessage());
                 }
-
                 return $response;
             }
 

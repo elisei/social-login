@@ -13,6 +13,7 @@ use Magento\Framework\Url\EncoderInterface;
 use Magento\Framework\Url\HostChecker;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
+use Magento\Customer\Model\Session;
 use Magento\Store\Model\ScopeInterface;
 use O2TI\SocialLogin\Provider\Provider;
 
@@ -26,12 +27,12 @@ class Providers extends Template
     /**
      * Module is Enabled.
      */
-    public const CONFIG_PATH_SOCIAL_LOGIN_ENABLED = 'social_login/config/enabled';
+    public const CONFIG_PATH_SOCIAL_LOGIN_ENABLED = 'social_login/general/enabled';
 
     /**
      * @var ScopeConfigInterface
      */
-    private $scopeConfig;
+    protected $scopeConfig;
 
     /**
      * @var UrlInterface
@@ -51,12 +52,17 @@ class Providers extends Template
     /**
      * @var DecoderInterface
      */
-    private $urlDecoder;
+    protected $urlDecoder;
 
     /**
      * @var HostChecker
      */
-    private $hostChecker;
+    protected $hostChecker;
+
+    /**
+     * @var Session
+     */
+    protected $session;
 
     /**
      * Construct.
@@ -64,6 +70,7 @@ class Providers extends Template
      * @param Context              $context
      * @param ScopeConfigInterface $scopeConfig
      * @param RequestInterface     $request
+     * @param Session              $session
      * @param UrlInterface         $urlBuilder
      * @param EncoderInterface     $urlEncoder
      * @param DecoderInterface     $urlDecoder
@@ -74,6 +81,7 @@ class Providers extends Template
         \Magento\Backend\Block\Template\Context $context,
         ScopeConfigInterface $scopeConfig,
         RequestInterface $request,
+        Session $session,
         UrlInterface $urlBuilder,
         EncoderInterface $urlEncoder,
         DecoderInterface $urlDecoder = null,
@@ -82,6 +90,7 @@ class Providers extends Template
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->request = $request;
+        $this->session = $session;
         $this->urlBuilder = $urlBuilder;
         $this->urlEncoder = $urlEncoder;
         $this->urlDecoder = $urlDecoder ?: \Magento\Framework\App\ObjectManager::getInstance()
@@ -98,12 +107,22 @@ class Providers extends Template
      *
      * @return bool
      */
-    private function isEnabled($provider)
+    public function isEnabled($provider)
     {
         return (bool) $this->scopeConfig->getValue(
             sprintf(Provider::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED, $provider),
             ScopeInterface::SCOPE_STORE
         );
+    }
+
+    /**
+     * Is Available.
+     *
+     * @return bool
+     */
+    public function isAvailable()
+    {
+        return (bool) !$this->session->isLoggedIn();
     }
 
     /**
@@ -115,17 +134,15 @@ class Providers extends Template
     {
         $params = [];
         $referer = $this->getRequestReferrer();
-        if ($referer) {
-            $params = [
-                self::REFERER_QUERY_PARAM_NAME => $referer,
-            ];
-        } else {
+        
+        if (!$referer) {
             $current = $this->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]);
-            $refererCurrent = $this->urlEncoder->encode($current);
-            $params = [
-                self::REFERER_QUERY_PARAM_NAME => $refererCurrent,
-            ];
+            $referer = $this->urlEncoder->encode($current);
         }
+
+        $params = [
+            self::REFERER_QUERY_PARAM_NAME => $referer,
+        ];
 
         return [
             'socialLogin' => [
@@ -173,7 +190,7 @@ class Providers extends Template
                 self::REFERER_QUERY_PARAM_NAME => $referer,
             ];
         }
-
-        return $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params);
+        $params = http_build_query($params);
+        return $this->urlBuilder->getUrl('sociallogin/endpoint/index').$params;
     }
 }
