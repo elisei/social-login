@@ -53,6 +53,6 @@ class Index extends Action
 
         $response = $this->provider->setAutenticateAndReferer($provider, $isSecure, $referer);
         // phpcs:ignore
-        return $this->_redirect($this->urlDecoder->decode($referer));
+        return $this->_redirect($this->urlDecoder->decode($response['redirectUrl']));
     }
 }

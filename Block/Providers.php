@@ -6,6 +6,7 @@
 
 namespace O2TI\SocialLogin\Block;
 
+use Magento\Customer\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Url\DecoderInterface;
@@ -13,7 +14,6 @@ use Magento\Framework\Url\EncoderInterface;
 use Magento\Framework\Url\HostChecker;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
-use Magento\Customer\Model\Session;
 use Magento\Store\Model\ScopeInterface;
 use O2TI\SocialLogin\Provider\Provider;
 
@@ -134,7 +134,7 @@ class Providers extends Template
     {
         $params = [];
         $referer = $this->getRequestReferrer();
-        
+
         if (!$referer) {
             $current = $this->getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]);
             $referer = $this->urlEncoder->encode($current);
@@ -190,7 +190,6 @@ class Providers extends Template
                 self::REFERER_QUERY_PARAM_NAME => $referer,
             ];
         }
-        $params = http_build_query($params);
-        return $this->urlBuilder->getUrl('sociallogin/endpoint/index').$params;
+        return $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params);
     }
 }

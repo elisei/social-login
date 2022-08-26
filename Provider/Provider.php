@@ -377,6 +377,7 @@ class Provider
             $customer = $this->setCustomerData($socialProfile);
             if ($customer->getId()) {
                 $customerDataObject = $this->customerRepository->getById($customer->getId());
+
                 try {
                     $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
 
@@ -386,7 +387,6 @@ class Provider
                         $metadata->setPath('/');
                         $this->cookieManager->deleteCookie('mage-cache-sessid', $metadata);
                     }
-
                 } catch (\Exception $exc) {
                     $this->messageManager->addError($exc->getMessage());
                 }
