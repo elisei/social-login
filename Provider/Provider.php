@@ -390,6 +390,7 @@ class Provider
                 } catch (\Exception $exc) {
                     $this->messageManager->addError($exc->getMessage());
                 }
+
                 return $response;
             }
 

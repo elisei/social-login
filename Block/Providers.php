@@ -190,6 +190,7 @@ class Providers extends Template
                 self::REFERER_QUERY_PARAM_NAME => $referer,
             ];
         }
+
         return $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params);
     }
 }
