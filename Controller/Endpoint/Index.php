@@ -52,6 +52,9 @@ class Index extends Action
         $referer = $this->_request->getParam('referer');
 
         $response = $this->provider->setAutenticateAndReferer($provider, $isSecure, $referer);
+
+        $this->getResponse()->setHeader('Referrer-Policy', 'no-referrer');
+
         // phpcs:ignore
         return $this->_redirect($this->urlDecoder->decode($response['redirectUrl']));
     }
