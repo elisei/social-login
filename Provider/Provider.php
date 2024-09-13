@@ -249,10 +249,11 @@ class Provider
             $customerData[strtolower($field)] = $data !== null ? $data : '-';
         }
 
+        $lastName = ($customerData['lastname'] === '-') ? $customerData['firstname'] : $customerData['lastname'];
         $customer = $this->customerDataFactory->create();
         $customer->setEmail($customerData['email']);
         $customer->setFirstname($customerData['firstname']);
-        $customer->setLastname($customerData['lastname']);
+        $customer->setLastname($lastName);
         $storeId = $this->storeManager->getStore()->getId();
         $customer->setStoreId($storeId);
         $websiteId = $this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
