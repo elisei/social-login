@@ -1,0 +1,19 @@
+<?php
+/**
+ * Copyright © O2TI. All rights reserved.
+ *
+ * @var \O2TI\SocialLogin\Block\Providers $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<?php if ($block->isAvailable()): ?>
+    <script type="text/x-magento-init">
+    {
+        "*": {
+            "O2TI_SocialLogin/js/social-global-config": {
+                "config": <?= /* @noEscape */ $block->getSocialGlobalConfigJson() ?>
+            }
+        }
+    }
+    </script>
+<?php endif; ?>

@@ -1,0 +1,35 @@
+<?php
+/**
+ * Copyright © O2TI. All rights reserved.
+ *
+ * @var \O2TI\SocialLogin\Block\Providers $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<?php if ($block->isAvailable()): ?>
+    <?php $config = $block->getSocialConfig(); ?>
+    <?php if ($config): ?>
+        <div class="block-social-login" data-bind="scope:'providers'">
+                <h2 class="sub-title-actions">
+                    <span><?= $escaper->escapeHtml(__('Identifique-se para fazer a sua avaliação')) ?></span>
+                </h2>
+                <!-- ko template: getTemplate() -->
+                <!-- /ko -->
+        </div>
+        <script type="text/x-magento-init">
+            {
+                "*": {
+                    "Magento_Ui/js/core/app": {
+                        "components": {
+                            "providers": {
+                                "component": "O2TI_SocialLogin/js/view/buttons",
+                                "template": "O2TI_SocialLogin/social-login",
+                                "data": <?= /* @noEscape */ $block->getSocialConfigJson() ?>
+                            }
+                        }
+                    }
+                }
+            }
+        </script>
+    <?php endif; ?>
+<?php endif; ?>

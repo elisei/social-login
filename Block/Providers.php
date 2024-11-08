@@ -16,6 +16,8 @@ use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Template;
 use Magento\Store\Model\ScopeInterface;
 use O2TI\SocialLogin\Provider\Provider;
+use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\View\Helper\SecureHtmlRenderer;
 
 class Providers extends Template
 {
@@ -65,17 +67,29 @@ class Providers extends Template
     protected $session;
 
     /**
+     * @var Json
+     */
+    private $serializer;
+
+    /**
+     * @var SecureHtmlRenderer
+     */
+    private $secureHtmlRenderer;
+
+    /**
      * Construct.
      *
-     * @param Context              $context
+     * @param \Magento\Backend\Block\Template\Context $context
      * @param ScopeConfigInterface $scopeConfig
-     * @param RequestInterface     $request
-     * @param Session              $session
-     * @param UrlInterface         $urlBuilder
-     * @param EncoderInterface     $urlEncoder
-     * @param DecoderInterface     $urlDecoder
-     * @param HostChecker          $hostChecker
-     * @param array                $data
+     * @param RequestInterface $request
+     * @param Session $session
+     * @param UrlInterface $urlBuilder
+     * @param EncoderInterface $urlEncoder
+     * @param DecoderInterface $urlDecoder
+     * @param HostChecker $hostChecker
+     * @param Json $serializer
+     * @param SecureHtmlRenderer $secureHtmlRenderer
+     * @param array $data
      */
     public function __construct(
         \Magento\Backend\Block\Template\Context $context,
@@ -86,6 +100,8 @@ class Providers extends Template
         EncoderInterface $urlEncoder,
         DecoderInterface $urlDecoder = null,
         HostChecker $hostChecker = null,
+        Json $serializer = null,
+        SecureHtmlRenderer $secureHtmlRenderer = null,
         array $data = []
     ) {
         $this->scopeConfig = $scopeConfig;
@@ -97,7 +113,21 @@ class Providers extends Template
             ->get(DecoderInterface::class);
         $this->hostChecker = $hostChecker ?: \Magento\Framework\App\ObjectManager::getInstance()
             ->get(HostChecker::class);
+        $this->serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
+            ->get(Json::class);
+        $this->secureHtmlRenderer = $secureHtmlRenderer ?: \Magento\Framework\App\ObjectManager::getInstance()
+            ->get(SecureHtmlRenderer::class);
         parent::__construct($context, $data);
+    }
+
+    /**
+     * Get secure html renderer
+     *
+     * @return SecureHtmlRenderer
+     */
+    public function getSecureRenderer(): SecureHtmlRenderer
+    {
+        return $this->secureHtmlRenderer;
     }
 
     /**
@@ -123,6 +153,20 @@ class Providers extends Template
     public function isAvailable()
     {
         return (bool) !$this->session->isLoggedIn();
+    }
+
+    /**
+     * Get Social Config as JSON string
+     *
+     * @return string
+     */
+    public function getSocialConfigJson()
+    {
+        try {
+            return $this->serializer->serialize($this->getSocialConfig());
+        } catch (\InvalidArgumentException $e) {
+            return '{}';
+        }
     }
 
     /**
@@ -159,6 +203,21 @@ class Providers extends Template
                 ],
             ],
         ];
+    }
+
+    /**
+     * Get Social Global Config as JSON string
+     *
+     * @return string
+     */
+    public function getSocialGlobalConfigJson()
+    {
+        try {
+            $config = $this->getSocialConfig();
+            return $this->serializer->serialize($config['socialLogin']);
+        } catch (\InvalidArgumentException $e) {
+            return '{}';
+        }
     }
 
     /**

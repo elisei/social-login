@@ -9,6 +9,9 @@ var config = {
         mixins: {
             "Magento_Checkout/js/model/step-navigator": {
                 "O2TI_SocialLogin/js/mixin/step-navigator-mixin": true
+            },
+            'Magento_Customer/js/view/authentication-popup': {
+                'O2TI_SocialLogin/js/mixin/authentication-popup-mixin': true
             }
         }
     }

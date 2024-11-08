@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="head.additional">
+            <block class="O2TI\SocialLogin\Block\Providers" name="social.login.providers" template="O2TI_SocialLogin::global-config.phtml" before="-"/>
+        </referenceBlock>
+        <referenceBlock name="authentication-popup">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="authenticationPopup" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="social-buttons" xsi:type="array">
+                                    <item name="component" xsi:type="string">O2TI_SocialLogin/js/view/social-authentication-popup</item>
+                                    <item name="displayArea" xsi:type="string">sociallogin</item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>
