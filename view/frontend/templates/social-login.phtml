@@ -6,6 +6,7 @@
  * @var \Magento\Framework\Escaper $escaper
  */
 ?>
+<?php if ($block->isModuleEnabled()): ?>
 <div class="block-social-login" data-bind="scope:'providers'">
    <!-- ko template: getTemplate() -->
    <!-- /ko -->
@@ -25,3 +26,4 @@
    }
 }
 </script>
+<?php endif; ?>

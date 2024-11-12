@@ -146,13 +146,26 @@ class Providers extends Template
     }
 
     /**
+     * Module Enabled.
+     *
+     * @return bool
+     */
+    public function isModuleEnabled()
+    {
+        return (bool) $this->scopeConfig->getValue(
+            Provider::CONFIG_PATH_SOCIAL_LOGIN_ENABLED,
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
      * Is Available.
      *
      * @return bool
      */
     public function isAvailable()
     {
-        return (bool) !$this->session->isLoggedIn();
+        return (bool) !$this->session->isLoggedIn() && $this->isModuleEnabled();
     }
 
     /**
@@ -191,10 +204,7 @@ class Providers extends Template
         return [
             'socialLogin' => [
                 'social-login-url' => $this->getLoginPostUrlBase(),
-                'enabled'          => (bool) $this->scopeConfig->getValue(
-                    self::CONFIG_PATH_SOCIAL_LOGIN_ENABLED,
-                    ScopeInterface::SCOPE_STORE
-                ),
+                'enabled'          => (bool) $this->isModuleEnabled(),
                 'redirectUrl'           => $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params),
                 'providers'             => [
                     'facebook'      => $this->isEnabled('facebook'),

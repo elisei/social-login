@@ -18,7 +18,12 @@ define([
         initialize() {
             var self = this;
             self._super();
-            isVisible: true;
+        },
+        isVisible() {
+            if (!window.hasOwnProperty('socialLogin')){
+                return false;
+            }
+            return window.socialLogin.enabled;
         },
         isEnabled(provider) {
             if (!window.hasOwnProperty('socialLogin')){
