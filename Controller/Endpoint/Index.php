@@ -55,7 +55,13 @@ class Index extends Action
 
         $this->getResponse()->setHeader('Referrer-Policy', 'no-referrer');
 
+        $redirect = $response['redirectUrl'];
+
+        if (strpos($redirect, 'http')) {
+            $redirect = $this->urlDecoder->decode($response['redirectUrl']);
+        }
+
         // phpcs:ignore
-        return $this->_redirect($this->urlDecoder->decode($response['redirectUrl']));
+        return $this->_redirect($redirect);
     }
 }
