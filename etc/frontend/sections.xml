@@ -10,5 +10,7 @@
     <action name="sociallogin/endpoint/index">
         <section name="checkout-data"/>
         <section name="cart"/>
+        <section name="customer"/>
+        <section name="messages"/>
     </action>
 </config>
