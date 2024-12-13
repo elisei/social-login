@@ -3,6 +3,7 @@
     <body>
         <referenceBlock name="head.additional">
             <block class="O2TI\SocialLogin\Block\Providers" name="social.login.providers" template="O2TI_SocialLogin::global-config.phtml" before="-"/>
+            <block class="O2TI\SocialLogin\Block\Providers" name="social.login.refres.customer" template="O2TI_SocialLogin::refresh-customer-data.phtml" before="-"/>
         </referenceBlock>
         <referenceBlock name="authentication-popup">
             <arguments>

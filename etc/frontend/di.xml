@@ -13,4 +13,9 @@
             </argument>
         </arguments>
     </type>
+    <type name="O2TI\SocialLogin\Provider\Provider">
+        <arguments>
+            <argument name="eventManager" xsi:type="object">Magento\Framework\Event\ManagerInterface</argument>
+        </arguments>
+    </type>
 </config>

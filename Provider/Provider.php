@@ -9,20 +9,20 @@ namespace O2TI\SocialLogin\Provider;
 use Exception;
 use Hybridauth\HybridauthFactory;
 use Hybridauth\User\Profile as SocialProfile;
-use Magento\Customer\Api\AccountManagementInterface;
-use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Customer\Model\Account\Redirect as AccountRedirect;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Model\CustomerFactory;
-use Magento\Customer\Model\ResourceModel\Customer as CustomerResource;
+use Magento\Customer\Api\AccountManagementInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Customer\Model\Url as CustomerUrl;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface;
-use Magento\Framework\Session\SessionManagerInterface;
+use Magento\Framework\Session\Config\ConfigInterface;
 use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
 use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\UrlInterface;
@@ -30,9 +30,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 /**
- * Provider section.
- *
- * @SuppressWarnings(PHPMD.CookieAndSessionMisuse)
+ * Provider class for social login functionality
  */
 class Provider
 {
@@ -43,13 +41,9 @@ class Provider
     public const COOKIE_NAME = 'login_redirect';
 
     /**
-     * The providers we currently support.
+     * @var array
      */
-    public const PROVIDERS = [
-        'facebook',
-        'google',
-        'WindowsLive',
-    ];
+    private array $supportedProviders = ['facebook', 'google', 'WindowsLive'];
 
     /**
      * @var HybridauthFactory
@@ -64,32 +58,22 @@ class Provider
     /**
      * @var AccountManagementInterface
      */
-    protected $accountManagement;
-
-    /**
-     * @var CustomerUrl
-     */
-    protected $customerUrl;
+    private $accountManagement;
 
     /**
      * @var CustomerInterfaceFactory
      */
-    protected $customerDataFactory;
+    private $customerDataFactory;
+
+    /**
+     * @var CustomerRepositoryInterface
+     */
+    private $customerRepository;
 
     /**
      * @var CustomerFactory
      */
     private $customerFactory;
-
-    /**
-     * @var CustomerResource
-     */
-    private $customerResource;
-
-    /**
-     * @var CustomerSession
-     */
-    private $customerSession;
 
     /**
      * @var StoreManagerInterface
@@ -102,6 +86,31 @@ class Provider
     private $scopeConfig;
 
     /**
+     * @var ManagerInterface
+     */
+    private $messageManager;
+
+    /**
+     * @var AccountRedirect
+     */
+    private $accountRedirect;
+
+    /**
+     * @var EventManager
+     */
+    private $eventManager;
+
+    /**
+     * @var ConfigInterface
+     */
+    private $sessionConfig;
+
+    /**
+     * @var CustomerSession
+     */
+    private $customerSession;
+
+    /**
      * @var CookieManagerInterface
      */
     private $cookieManager;
@@ -112,292 +121,286 @@ class Provider
     private $cookieMetadataFactory;
 
     /**
-     * @var SessionManagerInterface
+     * @var CustomerUrl
      */
-    private $sessionManager;
+    private $customerUrl;
 
     /**
-     * @var CustomerRepositoryInterface
-     */
-    protected $customerRepository;
-
-    /**
-     * @var ManagerInterface
-     */
-    private $messageManager;
-
-    /**
-     * @var AccountRedirect
-     */
-    protected $accountRedirect;
-
-    /**
-     * @param HybridauthFactory           $hybridauthFactory
-     * @param UrlInterface                $url
-     * @param AccountManagementInterface  $accountManagement
-     * @param CustomerUrl                 $customerUrl
-     * @param CustomerInterfaceFactory    $customerDataFactory
-     * @param CustomerFactory             $customerFactory
-     * @param CustomerResource            $customerResource
-     * @param StoreManagerInterface       $storeManager
-     * @param ScopeConfigInterface        $scopeConfig
-     * @param SessionManagerInterface     $sessionManager
-     * @param CustomerRepositoryInterface $customerRepository
-     * @param ManagerInterface            $messageManager
-     * @param AccountRedirect             $accountRedirect
-     * @param CustomerSession|null        $customerSession
-     * @param CookieManagerInterface      $cookieManager
-     * @param CookieMetadataFactory       $cookieMetadataFactory
+     * Constructor
+     *
+     * @param HybridauthFactory             $hybridauthFactory
+     * @param UrlInterface                  $url
+     * @param AccountManagementInterface    $accountManagement
+     * @param CustomerInterfaceFactory      $customerDataFactory
+     * @param CustomerRepositoryInterface   $customerRepository
+     * @param CustomerFactory               $customerFactory
+     * @param StoreManagerInterface         $storeManager
+     * @param ScopeConfigInterface          $scopeConfig
+     * @param ManagerInterface              $messageManager
+     * @param AccountRedirect               $accountRedirect
+     * @param EventManager                  $eventManager
+     * @param ConfigInterface               $sessionConfig
+     * @param CustomerSession               $customerSession
+     * @param CookieManagerInterface        $cookieManager
+     * @param CookieMetadataFactory         $cookieMetadataFactory
+     * @param CustomerUrl                   $customerUrl
      */
     public function __construct(
         HybridauthFactory $hybridauthFactory,
         UrlInterface $url,
         AccountManagementInterface $accountManagement,
-        CustomerUrl $customerUrl,
         CustomerInterfaceFactory $customerDataFactory,
+        CustomerRepositoryInterface $customerRepository,
         CustomerFactory $customerFactory,
-        CustomerResource $customerResource,
         StoreManagerInterface $storeManager,
         ScopeConfigInterface $scopeConfig,
-        SessionManagerInterface $sessionManager,
-        CustomerRepositoryInterface $customerRepository,
         ManagerInterface $messageManager,
         AccountRedirect $accountRedirect,
-        ?CustomerSession $customerSession = null,
-        CookieManagerInterface $cookieManager = null,
-        CookieMetadataFactory $cookieMetadataFactory = null
+        EventManager $eventManager,
+        ConfigInterface $sessionConfig,
+        CustomerSession $customerSession,
+        CookieManagerInterface $cookieManager,
+        CookieMetadataFactory $cookieMetadataFactory,
+        CustomerUrl $customerUrl,
     ) {
         $this->hybridauthFactory = $hybridauthFactory;
         $this->url = $url;
         $this->accountManagement = $accountManagement;
-        $this->customerUrl = $customerUrl;
         $this->customerDataFactory = $customerDataFactory;
+        $this->customerRepository = $customerRepository;
         $this->customerFactory = $customerFactory;
-        $this->customerResource = $customerResource;
-        $this->customerSession = $customerSession ?? ObjectManager::getInstance()->get(CustomerSession::class);
         $this->storeManager = $storeManager;
         $this->scopeConfig = $scopeConfig;
-        $this->cookieManager = $cookieManager ?:
-            ObjectManager::getInstance()->get(CookieManagerInterface::class);
-        $this->cookieMetadataFactory = $cookieMetadataFactory ?:
-            ObjectManager::getInstance()->get(CookieMetadataFactory::class);
-        $this->sessionManager = $sessionManager;
-        $this->customerRepository = $customerRepository;
         $this->messageManager = $messageManager;
-        $this->accountRedirect = $accountRedirect ?: ObjectManager::getInstance()->get(AccountRedirect::class);
+        $this->eventManager = $eventManager;
+        $this->accountRedirect = $accountRedirect;
+        $this->sessionConfig = $sessionConfig;
+        $this->customerSession = $customerSession;
+        $this->cookieManager = $cookieManager;
+        $this->cookieMetadataFactory = $cookieMetadataFactory;
+        $this->customerUrl = $customerUrl;
     }
 
     /**
-     * Implements Config Module.
+     * Get provider configuration
      *
      * @param string $provider
-     *
      * @return array
      */
     private function getProvidersConfig(string $provider): array
     {
-        $config = [];
-        $config[$provider] = [
-            'enabled' => (bool) $this->scopeConfig->getValue(
-                sprintf(self::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED, $provider),
-                ScopeInterface::SCOPE_STORE
-            ),
-            'keys' => [
-                'key' => $this->scopeConfig->getValue(
-                    sprintf(self::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_KEY, $provider),
+        return [
+            $provider => [
+                'enabled' => (bool) $this->scopeConfig->getValue(
+                    sprintf(self::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED, $provider),
                     ScopeInterface::SCOPE_STORE
                 ),
-                'secret' => $this->scopeConfig->getValue(
-                    sprintf(self::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_SECRET, $provider),
-                    ScopeInterface::SCOPE_STORE
-                ),
-            ],
+                'keys' => [
+                    'key' => $this->scopeConfig->getValue(
+                        sprintf(self::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_KEY, $provider),
+                        ScopeInterface::SCOPE_STORE
+                    ),
+                    'secret' => $this->scopeConfig->getValue(
+                        sprintf(self::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_SECRET, $provider),
+                        ScopeInterface::SCOPE_STORE
+                    ),
+                ],
+            ]
         ];
-
-        return $config;
     }
 
     /**
-     * Generate Url Endpoint.
+     * Get endpoint URL
      *
      * @param string $provider
-     *
      * @return string
      */
     private function getEndpoint(string $provider): string
     {
-        $params = [
-            '_secure'  => true,
-            'provider' => $provider,
-        ];
-
-        return $this->url->getUrl('sociallogin/endpoint/index', $params);
+        return $this->url->getUrl('sociallogin/endpoint/index', [
+            '_secure' => true,
+            'provider' => $provider
+        ]);
     }
 
     /**
-     * Gets customer data for a hybrid auth profile.
+     * Create customer from social profile
      *
      * @param SocialProfile $profile
-     *
-     * @return CustomerFactory
+     * @return CustomerInterface
+     * @throws LocalizedException
      */
-    private function getCustomerData(SocialProfile $profile)
+    private function createCustomerFromProfile(SocialProfile $profile): CustomerInterface
     {
-        $customerData = [];
-        foreach (['firstName', 'lastName', 'email'] as $field) {
-            $data = $profile->{$field};
-            $customerData[strtolower($field)] = $data !== null ? $data : '-';
+        if (empty($profile->email)) {
+            throw new LocalizedException(__('Email is required for social login'));
         }
 
-        $lastName = ($customerData['lastname'] === '-') ? $customerData['firstname'] : $customerData['lastname'];
         $customer = $this->customerDataFactory->create();
-        $customer->setEmail($customerData['email']);
-        $customer->setFirstname($customerData['firstname']);
+        $firstName = $profile->firstName ?? '-';
+        $lastName = $profile->lastName ?? $firstName;
+
+        $customer->setEmail($profile->email);
+        $customer->setFirstname($firstName);
         $customer->setLastname($lastName);
-        $storeId = $this->storeManager->getStore()->getId();
-        $customer->setStoreId($storeId);
-        $websiteId = $this->storeManager->getStore($customer->getStoreId())->getWebsiteId();
-        $customer->setWebsiteId($websiteId);
+
+        $store = $this->storeManager->getStore();
+        $customer->setStoreId($store->getId());
+        $customer->setWebsiteId($store->getWebsiteId());
 
         return $customer;
     }
 
     /**
-     * Set Customer.
+     * Create new customer account
+     *
+     * @param CustomerInterface $customer
+     * @return CustomerInterface
+     * @throws LocalizedException
+     */
+    private function createNewAccount(CustomerInterface $customer): CustomerInterface
+    {
+        try {
+            $customer = $this->accountManagement->createAccount($customer);
+            
+            if ($this->accountManagement->getConfirmationStatus($customer->getId()) ===
+                AccountManagementInterface::ACCOUNT_CONFIRMATION_REQUIRED) {
+                $this->messageManager->addComplexSuccessMessage(
+                    'checkoutConfirmAccountSuccessMessage',
+                    [
+                        'url' => $this->customerUrl->getEmailConfirmationUrl(
+                            $customer->getEmail()
+                        )
+                    ]
+                );
+            }
+            
+            return $customer;
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage(__('Unable to create account: %1', $e->getMessage()));
+            throw new LocalizedException(__('Account creation failed'));
+        }
+    }
+
+    /**
+     * Get existing customer or create new one
      *
      * @param SocialProfile $socialProfile
-     *
-     * @return CustomerFactory
+     * @return CustomerInterface
+     * @throws LocalizedException
      */
-    private function setCustomerData(SocialProfile $socialProfile)
+    private function getOrCreateCustomer(SocialProfile $socialProfile): CustomerInterface
     {
         $websiteId = $this->storeManager->getWebsite()->getId();
         $customer = $this->customerFactory->create();
         $customer->setWebsiteId($websiteId);
+
         if ($socialProfile->email) {
             $customer->loadByEmail($socialProfile->email);
-            if (!$customer->getId()) {
-                $customer = $this->getCustomerData($socialProfile);
-                $customer = $this->createNewAccount($customer);
+            if ($customer->getId()) {
+                return $this->customerRepository->getById($customer->getId());
             }
         }
 
-        return $customer;
+        return $this->createNewAccount($this->createCustomerFromProfile($socialProfile));
     }
 
     /**
-     * Create New Account.
-     *
-     * @param CustomerFactory $customer
-     *
-     * @return CustomerFactory
-     */
-    public function createNewAccount($customer)
-    {
-        try {
-            $customer = $this->accountManagement
-                ->createAccount($customer);
-
-            $confirmationStatus = $this->accountManagement->getConfirmationStatus($customer->getId());
-            if ($confirmationStatus === AccountManagementInterface::ACCOUNT_CONFIRMATION_REQUIRED) {
-                $this->messageManager->addComplexSuccessMessage(
-                    'checkoutConfirmAccountSuccessMessage',
-                    [
-                        'url' => $this->customerUrl->getEmailConfirmationUrl($customer->getEmail()),
-                    ]
-                );
-            }
-        } catch (\Exception $exc) {
-            $this->messageManager->addError(__('Unable to create account.'));
-            $this->messageManager->addError(__($exc->getMessage()));
-        }
-
-        return $customer;
-    }
-
-    /**
-     * Login account.
-     *
-     * @param string $provider
-     *
-     * @throws LocalizedException
+     * Refresh customer sections and clean session cache
      *
      * @return void
      */
-    public function login(string $provider): void
+    private function refreshSections(): void
     {
-        $hybridAuth = $this->hybridauthFactory->create([
-            'config' => [
-                'callback'  => $this->getEndpoint($provider),
-                'providers' => $this->getProvidersConfig($provider),
-            ],
+        $this->eventManager->dispatch('customer_login', [
+            'customer' => $this->customerSession->getCustomer()
         ]);
-        $authenticate = $hybridAuth->authenticate($provider);
-        if ($authenticate->isConnected()) {
-            $socialProfile = $authenticate->getUserProfile();
-            $customer = $this->setCustomerData($socialProfile);
+        $this->eventManager->dispatch('customer_data_object_login', [
+            'customer' => $this->customerSession->getCustomer()
+        ]);
+
+        $metadata = $this->cookieMetadataFactory->createPublicCookieMetadata()
+            ->setPath($this->sessionConfig->getCookiePath())
+            ->setSecure($this->sessionConfig->getCookieSecure())
+            ->setDuration($this->sessionConfig->getCookieLifetime());
+
+        $this->cookieManager->setPublicCookie(
+            'social-login-refresh-sessions',
+            'true',
+            $metadata
+        );
+
+        // Remove mage-cache-sessid cookie if exists
+        if ($this->cookieManager->getCookie('mage-cache-sessid')) {
+            $this->cookieManager->deleteCookie('mage-cache-sessid', $metadata);
         }
     }
 
     /**
-     * Set Autenticate And Referer.
+     * Perform login
      *
-     * @param string      $provider
-     * @param int|null    $isSecure
+     * @param string $provider
+     * @return void
+     * @throws LocalizedException
+     */
+    public function login(string $provider): void
+    {
+        if (!in_array($provider, $this->supportedProviders, true)) {
+            throw new LocalizedException(__('Unsupported provider'));
+        }
+
+        $hybridAuth = $this->hybridauthFactory->create([
+            'config' => [
+                'callback' => $this->getEndpoint($provider),
+                'providers' => $this->getProvidersConfig($provider),
+            ],
+        ]);
+
+        $authenticate = $hybridAuth->authenticate($provider);
+        if ($authenticate->isConnected()) {
+            $customer = $this->getOrCreateCustomer($authenticate->getUserProfile());
+            $this->customerSession->setCustomerDataAsLoggedIn($customer);
+            $this->refreshSections();
+        }
+    }
+
+    /**
+     * Set authentication and handle redirect
+     *
+     * @param string $provider
+     * @param bool $isSecure
      * @param string|null $referer
-     *
      * @return array
      */
-    public function setAutenticateAndReferer(string $provider, int $isSecure = 1, string $referer = null): array
+    public function setAutenticateAndReferer(string $provider, bool $isSecure = true, ?string $referer = null): array
     {
         if ($referer) {
             $this->accountRedirect->setRedirectCookie($referer);
         }
 
-        $redirect = $this->accountRedirect->getRedirectCookie();
-
-        $response['redirectUrl'] = $redirect;
-
-        $hybridAuth = $this->hybridauthFactory->create([
-            'config' => [
-                'callback'  => $this->getEndpoint($provider),
-                'providers' => $this->getProvidersConfig($provider),
-            ],
-        ]);
+        $response = ['redirectUrl' => $this->accountRedirect->getRedirectCookie()];
 
         try {
+            $hybridAuth = $this->hybridauthFactory->create([
+                'config' => [
+                    'callback' => $this->getEndpoint($provider),
+                    'providers' => $this->getProvidersConfig($provider),
+                ],
+            ]);
+
             $authenticate = $hybridAuth->authenticate($provider);
-        } catch (Exception $e) {
-            $this->messageManager->addError(__('Unable to login, try another way.'));
-
-            return $response;
-        }
-
-        if ($authenticate->isConnected()) {
-            $socialProfile = $authenticate->getUserProfile();
-            $customer = $this->setCustomerData($socialProfile);
-            if ($customer->getId()) {
-                $customerDataObject = $this->customerRepository->getById($customer->getId());
-
-                try {
-                    $this->customerSession->setCustomerDataAsLoggedIn($customerDataObject);
-
-                    if ($this->cookieManager->getCookie('mage-cache-sessid') &&
-                        $this->customerSession->getCustomerId()) {
-                        $metadata = $this->cookieMetadataFactory->createCookieMetadata();
-                        $metadata->setPath('/');
-                        $this->cookieManager->deleteCookie('mage-cache-sessid', $metadata);
-                    }
-                } catch (\Exception $exc) {
-                    $this->messageManager->addError($exc->getMessage());
-                }
-
-                return $response;
+            if (!$authenticate->isConnected()) {
+                throw new LocalizedException(__('Authentication failed'));
             }
 
-            $this->messageManager->addError(__('Unable to login, try another way.'));
+            $customer = $this->getOrCreateCustomer($authenticate->getUserProfile());
+            $this->customerSession->setCustomerDataAsLoggedIn($customer);
+            $this->refreshSections();
 
-            return $response;
+        } catch (Exception $e) {
+            $this->messageManager->addErrorMessage(__('Unable to login: %1', $e->getMessage()));
         }
+
+        return $response;
     }
 }
