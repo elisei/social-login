@@ -28,6 +28,7 @@ use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Customer\Model\ResourceModel\Customer as CustomerResource;
 
 /**
  * Provider class for social login functionality
@@ -126,6 +127,11 @@ class Provider
     private $customerUrl;
 
     /**
+     * @var CustomerResource
+     */
+    private $customerResource;
+
+    /**
      * Constructor
      *
      * @param HybridauthFactory             $hybridauthFactory
@@ -144,6 +150,7 @@ class Provider
      * @param CookieManagerInterface        $cookieManager
      * @param CookieMetadataFactory         $cookieMetadataFactory
      * @param CustomerUrl                   $customerUrl
+     * @param CustomerResource              $customerResource
      */
     public function __construct(
         HybridauthFactory $hybridauthFactory,
@@ -162,6 +169,7 @@ class Provider
         CookieManagerInterface $cookieManager,
         CookieMetadataFactory $cookieMetadataFactory,
         CustomerUrl $customerUrl,
+        CustomerResource $customerResource
     ) {
         $this->hybridauthFactory = $hybridauthFactory;
         $this->url = $url;
@@ -179,6 +187,7 @@ class Provider
         $this->cookieManager = $cookieManager;
         $this->cookieMetadataFactory = $cookieMetadataFactory;
         $this->customerUrl = $customerUrl;
+        $this->customerResource = $customerResource;
     }
 
     /**
@@ -306,6 +315,29 @@ class Provider
     }
 
     /**
+     * Check if customer account is locked
+     *
+     * @param int $customerId
+     * @return bool
+     */
+    private function isCustomerLocked(int $customerId): bool
+    {
+        $customerModel = $this->customerFactory->create();
+        $this->customerResource->load($customerModel, $customerId);
+        
+        $lockExpires = $customerModel->getLockExpires();
+        
+        if (!$lockExpires) {
+            return false;
+        }
+        
+        $now = new \DateTime();
+        $lockExpiresDate = new \DateTime($lockExpires);
+        
+        return ($now < $lockExpiresDate);
+    }
+
+    /**
      * Refresh customer sections and clean session cache
      *
      * @return void
@@ -359,6 +391,13 @@ class Provider
         $authenticate = $hybridAuth->authenticate($provider);
         if ($authenticate->isConnected()) {
             $customer = $this->getOrCreateCustomer($authenticate->getUserProfile());
+            
+            // Check if the customer account is locked
+            if ($this->isCustomerLocked($customer->getId())) {
+                $authenticate->disconnect();
+                throw new LocalizedException(__('Your account is locked. Please contact customer support.'));
+            }
+            
             $this->customerSession->setCustomerDataAsLoggedIn($customer);
             $this->refreshSections();
         }
@@ -394,6 +433,13 @@ class Provider
             }
 
             $customer = $this->getOrCreateCustomer($authenticate->getUserProfile());
+
+            // Check if the customer account is locked
+            if ($this->isCustomerLocked($customer->getId())) {
+                $authenticate->disconnect();
+                throw new LocalizedException(__('Your account is locked. Please contact customer support.'));
+            }
+
             $this->customerSession->setCustomerDataAsLoggedIn($customer);
             $this->refreshSections();
 
