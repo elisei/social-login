@@ -1,0 +1,39 @@
+type Mutation {
+    # Solicita um código de verificação para ser enviado por email
+    requestVerificationCode(
+        email: String! @doc(description: "Email do cliente para enviar o código de verificação")
+        referer: String @doc(description: "Página de referência (account, checkout, cart)")
+    ): VerificationCodeResponse @resolver(class: "O2TI\\SocialLogin\\Model\\Resolver\\RequestVerificationCode")
+
+    # Obtém o ID do cliente pelo email
+    getCustomerIdByEmail(
+        email: String! @doc(description: "Email do cliente para buscar o ID")
+    ): CustomerIdResponse @resolver(class: "O2TI\\SocialLogin\\Model\\Resolver\\GetCustomerIdByEmail")
+
+    # Valida o código de verificação e realiza o login
+    verifyCodeAndLogin(
+        customer_id: Int! @doc(description: "ID do cliente")
+        code: String! @doc(description: "Código de verificação recebido por email")
+    ): VerifyCodeResponse @resolver(class: "O2TI\\SocialLogin\\Model\\Resolver\\VerifyCodeAndLogin")
+}
+
+# Resposta para a solicitação de código de verificação
+type VerificationCodeResponse @doc(description: "Resposta da solicitação de código de verificação") {
+    success: Boolean! @doc(description: "Indica se a solicitação foi bem-sucedida")
+    message: String @doc(description: "Mensagem de sucesso ou erro")
+}
+
+# Resposta para a consulta de ID do cliente
+type CustomerIdResponse @doc(description: "Resposta da consulta de ID do cliente") {
+    success: Boolean! @doc(description: "Indica se a consulta foi bem-sucedida")
+    customer_id: Int @doc(description: "ID do cliente, se encontrado")
+    message: String @doc(description: "Mensagem de erro, se houver")
+}
+
+# Resposta para a verificação de código e login
+type VerifyCodeResponse @doc(description: "Resposta da verificação de código e login") {
+    success: Boolean! @doc(description: "Indica se a verificação e login foram bem-sucedidos")
+    message: String @doc(description: "Mensagem de sucesso ou erro")
+    redirect: String @doc(description: "URL para redirecionamento após login bem-sucedido")
+    customer_token: String @doc(description: "Token JWT do cliente para autenticação em requisições subsequentes")
+}
