@@ -7,7 +7,7 @@
  */
 ?>
 <?php if ($block->isModuleEnabled()): ?>
-<div class="block-social-login" data-bind="scope:'providers'">
+<div class="block-social-login" data-bind="scope:'social-login-component'">
    <!-- ko template: getTemplate() -->
    <!-- /ko -->
 </div>
@@ -16,14 +16,21 @@
    "*": {
        "Magento_Ui/js/core/app": {
            "components": {
-               "providers": {
-                   "component": "O2TI_SocialLogin/js/view/buttons",
-                   "template": "O2TI_SocialLogin/social-login",
-                   "data": <?= /* @noEscape */ $block->getSocialConfigJson() ?>
-               }
-           }
-       }
-   }
+                "social-login-component": {
+                    "component": "O2TI_SocialLogin/js/view/buttons",
+                    "template": "O2TI_SocialLogin/social-login",
+                    "data": <?= /* @noEscape */ $block->getSocialConfigJson() ?>,
+                    "children": {
+                        "form-verify-component": {
+                            "component": "O2TI_SocialLogin/js/view/form-verify",
+                            "displayArea": "form-verify",
+                            "data": <?= /* @noEscape */ $block->getSocialConfigJson() ?>
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 </script>
 <?php endif; ?>

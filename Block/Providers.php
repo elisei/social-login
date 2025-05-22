@@ -138,7 +138,7 @@ class Providers extends Template
      * @return bool
      */
     public function isEnabled($provider)
-    {
+    {        
         return (bool) $this->scopeConfig->getValue(
             sprintf(Provider::CONFIG_PATH_SOCIAL_LOGIN_PROVIDER_ENABLED, $provider),
             ScopeInterface::SCOPE_STORE
@@ -205,11 +205,13 @@ class Providers extends Template
             'socialLogin' => [
                 'social-login-url' => $this->getLoginPostUrlBase(),
                 'enabled'          => (bool) $this->isModuleEnabled(),
-                'redirectUrl'           => $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params),
-                'providers'             => [
+                'redirectUrl'      => $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params),
+                'referer'          => $referer, 
+                'providers'        => [
                     'facebook'      => $this->isEnabled('facebook'),
                     'google'        => $this->isEnabled('google'),
                     'WindowsLive'   => $this->isEnabled('WindowsLive'),
+                    'verify_code'   => $this->isEnabled('verify_code'),
                 ],
             ],
         ];

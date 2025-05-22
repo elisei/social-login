@@ -9,7 +9,14 @@
     <default>
         <social_login>
             <general>
-                <enabled>0</enabled>
+                <enabled>1</enabled>
+                <verify_code>
+                    <enabled>1</enabled>
+                    <link_expiration>1</link_expiration>
+                    <email_verify>
+                        <template>social_login_general_verify_code_email_verify_template</template>
+                    </email_verify>
+                </verify_code>
             </general>
         </social_login>
     </default>

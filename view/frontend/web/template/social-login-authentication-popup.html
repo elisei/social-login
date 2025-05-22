@@ -5,7 +5,7 @@
  */
 -->
 <!-- ko if: isVisible()  -->
-<form class="form social-login"  method="post">
+<form class="form social-login" method="post">
     <div class="block-title">
         <strong id="block-customer-social-login-heading" role="heading" aria-level="2" data-bind="i18n: 'Aproveite, continue com o seu login social'"></strong>
     </div>
@@ -13,22 +13,41 @@
         <ul class="social-login">
             <!-- ko if: isEnabled('google') -->
                 <li>
-                    <button type="submit" data-bind="attr: { formaction: getRedirectUrl('google') }" class="button btn-social-link btn-google" rel="noopener noreferrer nofollow" ><span><span>Continue com Google</span></span></button>
+                    <button type="submit" data-bind="attr: { formaction: getRedirectUrl('google') }" class="button btn-social-link btn-google" rel="noopener noreferrer nofollow" >
+                        <span><span data-bind="i18n: 'Continue with Google'"></span></span>
+                    </button>
                 </li>
             <!-- /ko -->
             <!-- ko if: isEnabled('facebook') -->
                 <li>
-                    <button type="submit" data-bind="attr: { formaction: getRedirectUrl('facebook') }" class="button btn-social-link btn-facebook" rel="noopener noreferrer nofollow" ><span><span>Continue com Facebook</span></span></button>
+                    <button type="submit" data-bind="attr: { formaction: getRedirectUrl('facebook') }" class="button btn-social-link btn-facebook" rel="noopener noreferrer nofollow" >
+                        <span><span data-bind="i18n: 'Continue with Facebook'"></span></span>
+                    </button>
                 </li>
             <!-- /ko -->
             <!-- ko if: isEnabled('WindowsLive') -->
                 <li>
-                    <button type="submit" data-bind="attr: { formaction: getRedirectUrl('WindowsLive') }" class="button btn-social-link btn-windowslive" rel="noopener noreferrer nofollow" ><span><span>Continue com Hotmail/Yahoo</span></span></button>
+                    <button type="submit" data-bind="attr: { formaction: getRedirectUrl('WindowsLive') }" class="button btn-social-link btn-windowslive" rel="noopener noreferrer nofollow" >
+                        <span><span data-bind="i18n: 'Continue with Microsoft Live'"></span></span>
+                    </button>
+                </li>
+            <!-- /ko -->
+            <!-- ko if: isEnabled('verify_code') -->
+                <li>
+                    <button type="button" data-bind="click: openVerifyCodeForm" class="button btn-social-link btn-form-verify" rel="noopener noreferrer nofollow">
+                        <span><span data-bind="i18n: 'Continue with Verify Code'"></span></span>
+                    </button>
                 </li>
             <!-- /ko -->
         </ul>
+        
+        <!-- ko foreach: getRegion('form-verify') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+        <!-- /ko -->
+        
         <div class="label-or" data-bind="attr: {'data-label': $t('or')}">
         </div>
     </div>
 </form>
 <!-- /ko -->
+ 

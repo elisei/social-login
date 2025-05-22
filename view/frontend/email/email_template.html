@@ -1,0 +1,39 @@
+<!--@subject {{trans "Access Code: %code" code=$code())}} @-->
+<!--@vars {
+"var code":"Verification Code",
+"var expiration": "Expiration",
+"var store.getFrontendName()":"Store Name",
+"var store.getBaseUrl()":"Store URL"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+
+<table  width="100%" cellspacing="0" cellpadding="0">
+    <tr class="email-intro">
+        <td>
+            <p>{{trans "Hello!"}}</p>
+            <p>{{trans "You requested a code to access %store_name." store_name=$store.getFrontendName()}}</p>
+            <p>{{trans "Your code is:"}}</p>
+        </td>
+    </tr>
+    <tr class="message-info">
+        <td>
+            <table class="message-info" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="center" style="padding: 20px 0;">
+                        <h1 style="margin-bottom: 0;" >{{var code}}</h1>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr class="email-information">
+        <td>
+            <p>{{trans "If you did not request this code, you can safely ignore this email."}}</p>
+            <p>{{trans "This code will expire in %expiration hour(s)." expiration=$expiration()}}</p>
+            <p>{{trans "Thank you!"}}</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}

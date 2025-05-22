@@ -8,9 +8,10 @@
 //  Variables
 //  _____________________________________________
 
-@bg-facebook: #3b5998;
+@bg-facebook: #fff;
 @bg-google: #fff;
-@bg-windowslive: #1570a6;
+@bg-windowslive: #fff;
+@bg-form-verify: #fff;
 
 //
 //  Common
@@ -18,6 +19,17 @@
 
 
 & when (@media-common = true) {
+    .block-verification-code {
+        max-width: 500px;
+        .fieldset {
+            margin-bottom: @indent__base;
+        }
+
+        .step-title {
+            &:extend(.abs-checkout-title all);
+        }
+    }
+
     ul {
         &.social-login {
             margin-top: @indent__base;
@@ -125,6 +137,37 @@
                     left: 0;
                 }
             }
+
+            .btn-form-verify {
+                .lib-button(
+                    @_button-background: @bg-form-verify,
+                    @_button-color: @color-black,
+                    @_button-icon-use: true,
+                    @_button-icon-font-position: before,
+                    @_button-font-size: 1.4rem,
+                    @_button-background-hover: fadeout(@bg-form-verify, 20%),
+                    @_button-color-hover: @color-black,
+                    @_button-background-active: fadeout(@bg-form-verify, 20%),
+                    @_button-color-active: @color-black,
+                    @_button-border: 1px solid darken(@bg-form-verify, 10%),
+                    @_button-border-active: 1px solid darken(@bg-form-verify, 10%),
+                    @_button-border-hover: 1px solid darken(@bg-form-verify, 10%)
+                );
+
+                line-height: 3.2rem;
+
+                span {
+                    margin-left: 10px;
+                }
+                .lib-icon-image(@_icon-image: "@{baseDir}O2TI_SocialLogin/images/btn-verify-code.svg", @_icon-image-position: before);
+                .lib-icon-image-size(43px, 43px);
+
+                &::before {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                }
+            }
         }
     }
     .list-social-login {
@@ -166,6 +209,25 @@
             .lib-css(line-height, 3.2rem);
 
             .lib-icon-image(@_icon-image: '@{baseDir}O2TI_SocialLogin/images/btn-google.svg', @_icon-image-position: before);
+            .lib-icon-image-size(43px, 43px);
+
+            span {
+                margin-left: 10px;
+            }
+
+            &::before {
+                left: 0;
+                position: absolute;
+                top: 0;
+            }
+        }
+
+        .btn-form-verify {
+            .lib-button(@_button-background: @bg-form-verify, @_button-icon-use: true, @_button-icon-font-position: before, @_button-font-size: 1.4rem, @_button-border: 1px solid darken(@bg-form-verify, 10%));
+
+            .lib-css(line-height, 3.2rem);
+
+            .lib-icon-image(@_icon-image: '@{baseDir}O2TI_SocialLogin/images/btn-verify-code.svg', @_icon-image-position: before);
             .lib-icon-image-size(43px, 43px);
 
             span {
@@ -232,30 +294,38 @@
 & when (@media-target = 'desktop'),
 (@media-target = 'all') {
   // Sobrescrita do nativo
-  .popup-authentication {
-    .block-authentication {
-      &.custom-for-social-login {
-        display: flex;
-        flex-direction: column;
-        border-top: 1px solid #c1c1c1;
-      }
-      .form {
-        &.social-login {
-          width: 100%;
-          flex-basis: 100%;
-          text-align: center;
-          margin-top: @indent__base;
+    .popup-authentication {
+        .block-authentication {
+            &.custom-for-social-login {
+                display: flex;
+                flex-direction: column;
+                border-top: 1px solid #c1c1c1;
+            }
+            .form {
+                &.social-login {
+                width: 100%;
+                flex-basis: 100%;
+                text-align: center;
+                margin-top: @indent__base;
+                }
+            }
+            .blocks-container {
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                .block-new-customer,
+                .block-customer-login {
+                    width: 50%;
+                }
+            }
+            .block-verification-code {
+                max-width: 500px;
+                margin: 0 auto;
+                .fieldset {
+                    text-align: left;
+                    margin-bottom: @indent__base;
+                }
+            }
         }
-      }
-      .blocks-container {
-          display: flex;
-          flex-direction: row;
-          width: 100%;
-          .block-new-customer,
-          .block-customer-login {
-              width: 50%;
-          }
-      }
     }
-  }
 }

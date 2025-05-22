@@ -27,6 +27,15 @@
                                                                             <item name="sortOrder" xsi:type="string">0</item>
                                                                             <item name="component" xsi:type="string">O2TI_SocialLogin/js/view/social-login</item>
                                                                             <item name="displayArea" xsi:type="string">login-methods</item>
+                                                                            <item name="children" xsi:type="array">
+                                                                                <item name="form-verify-component" xsi:type="array">
+                                                                                    <item name="component" xsi:type="string">O2TI_SocialLogin/js/view/form-verify</item>
+                                                                                    <item name="displayArea" xsi:type="string">form-verify</item>
+                                                                                    <item name="config" xsi:type="array">
+                                                                                        <item name="type" xsi:type="string">checkout</item>
+                                                                                    </item>
+                                                                                </item>
+                                                                            </item>
                                                                         </item>
                                                                     </item>
                                                                 </item>
@@ -48,6 +57,15 @@
                                                                             <item name="sortOrder" xsi:type="string">0</item>
                                                                             <item name="component" xsi:type="string">O2TI_SocialLogin/js/view/social-login</item>
                                                                             <item name="displayArea" xsi:type="string">login-methods</item>
+                                                                            <item name="children" xsi:type="array">
+                                                                                <item name="form-verify-component" xsi:type="array">
+                                                                                    <item name="component" xsi:type="string">O2TI_SocialLogin/js/view/form-verify</item>
+                                                                                    <item name="displayArea" xsi:type="string">form-verify</item>
+                                                                                    <item name="config" xsi:type="array">
+                                                                                        <item name="type" xsi:type="string">checkout</item>
+                                                                                    </item>
+                                                                                </item>
+                                                                            </item>
                                                                         </item>
                                                                     </item>
                                                                 </item>

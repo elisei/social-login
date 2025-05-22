@@ -13,4 +13,10 @@
         <section name="customer"/>
         <section name="messages"/>
     </action>
+    <action name="sociallogin/ajax/verify">
+        <section name="checkout-data"/>
+        <section name="cart"/>
+        <section name="customer"/>
+        <section name="messages"/>
+    </action>
 </config>

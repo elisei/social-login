@@ -132,12 +132,14 @@ class CheckoutConfigProvider implements ConfigProviderInterface
 
         return [
             'socialLogin' => [
-                'enabled'               => (bool) $this->isEnabled(),
-                'redirectUrl'           => $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params),
-                'providers'             => [
+                'enabled'          => (bool) $this->isEnabled(),
+                'redirectUrl'      => $this->urlBuilder->getUrl('sociallogin/endpoint/index', $params),
+                'referer'          => $params[self::REFERER_QUERY_PARAM_NAME], 
+                'providers'        => [
                     'facebook'      => $this->isProviderEnabled('facebook'),
                     'google'        => $this->isProviderEnabled('google'),
                     'WindowsLive'   => $this->isProviderEnabled('WindowsLive'),
+                    'verify_code'   => $this->isProviderEnabled('verify_code'),
                 ],
             ],
         ];

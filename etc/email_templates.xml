@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="social_login_general_verify_code_email_verify_template" label="O2TI Social Login Verify Code" file="email_template.html" type="html" module="O2TI_SocialLogin" area="frontend"/>
+</config>
