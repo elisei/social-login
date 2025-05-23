@@ -154,6 +154,19 @@ class VerifyCode
     }
     
     /**
+     * Validate verification code by email
+     *
+     * @param string $email
+     * @param string $code
+     * @return array
+     * @throws LocalizedException
+     */
+    public function validateCodeByEmail($email, $code)
+    {
+        return $this->verificationCodeService->validateCodeByEmail($email, $code);
+    }
+    
+    /**
      * Validate verification code
      *
      * @param int $customerId

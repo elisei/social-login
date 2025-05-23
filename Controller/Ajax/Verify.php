@@ -69,7 +69,7 @@ class Verify implements HttpPostActionInterface
         RedirectInterface $redirect,
         FormKeyValidator $formKeyValidator,
         ManagerInterface $messageManager,
-        verifyCode $verifyCode
+        VerifyCode $verifyCode
     ) {
         $this->request = $request;
         $this->resultJsonFactory = $resultJsonFactory;
@@ -110,16 +110,16 @@ class Verify implements HttpPostActionInterface
             ]);
         }
 
-        $customerId = (int)$this->request->getParam('customer_id');
+        $email = $this->request->getParam('email');
         $code = (string)$this->request->getParam('code');
 
         try {
-            if (!$customerId || !$code) {
+            if (!$email || !$code) {
                 throw new LocalizedException(__('Missing required parameters.'));
             }
 
-            $this->verifyCode->validateCode($customerId, $code);
-            $this->verifyCode->loginCustomer($customerId);
+            $result = $this->verifyCode->validateCodeByEmail($email, $code);
+            $this->verifyCode->loginCustomer($result['customer_id']);
 
             return $resultJson->setData([
                 'success' => true,
@@ -153,16 +153,16 @@ class Verify implements HttpPostActionInterface
             return $resultRedirect->setPath('*/*/');
         }
         
-        $customerId = (int)$this->request->getParam('customer_id');
+        $email = $this->request->getParam('email');
         $code = (string)$this->request->getParam('code');
         
         try {
-            if (!$customerId || !$code) {
+            if (!$email || !$code) {
                 throw new LocalizedException(__('Missing required parameters.'));
             }
             
-            $validationResult = $this->verifyCode->validateCode($customerId, $code);
-            $this->verifyCode->loginCustomer($customerId);
+            $validationResult = $this->verifyCode->validateCodeByEmail($email, $code);
+            $this->verifyCode->loginCustomer($validationResult['customer_id']);
             
             $this->messageManager->addSuccessMessage(__('You have been successfully logged in.'));
             

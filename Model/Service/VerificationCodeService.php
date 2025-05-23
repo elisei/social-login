@@ -173,6 +173,63 @@ class VerificationCodeService
     }
 
     /**
+     * Validate verification code by email
+     *
+     * @param string $email
+     * @param string $code
+     * @return array
+     * @throws LocalizedException
+     */
+    public function validateCodeByEmail($email, $code)
+    {
+        $collection = $this->verificationCodeCollectionFactory->create();
+        $collection->addFieldToFilter('email', $email)
+            ->addFieldToFilter('verification_code', $code)
+            ->addFieldToFilter('is_used', 0)
+            ->addFieldToFilter('expires_at', ['gt' => $this->dateTime->gmtDate()]);
+
+        if ($collection->getSize() === 0) {
+            // Register failed attempt by email instead of customer ID
+            $customerId = $this->getCustomerIdByEmail($email);
+            if ($customerId) {
+                $this->customerLockService->registerFailedAttempt($customerId);
+            }
+            throw new LocalizedException(__('Código de verificação inválido ou expirado. Por favor, tente novamente.'));
+        }
+
+        $verificationCode = $collection->getFirstItem();
+        $customerId = $verificationCode->getData('customer_id');
+        
+        // Mark code as used
+        $verificationCode->setData('is_used', 1);
+        $this->verificationCodeResource->save($verificationCode);
+        $this->customerLockService->resetFailedAttempts($customerId);
+
+        return [
+            'success' => true,
+            'customer_id' => $customerId,
+            'email' => $verificationCode->getData('email'),
+            'referer' => $verificationCode->getData('referer')
+        ];
+    }
+
+    /**
+     * Get customer ID by email (helper method)
+     *
+     * @param string $email
+     * @return int|null
+     */
+    private function getCustomerIdByEmail($email)
+    {
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $customerCollection = $objectManager->create(\Magento\Customer\Model\ResourceModel\Customer\CollectionFactory::class)->create();
+        $customerCollection->addFieldToFilter('email', $email);
+        $customer = $customerCollection->getFirstItem();
+        
+        return $customer->getId() ?: null;
+    }
+
+    /**
      * Validate verification code
      *
      * @param int $customerId

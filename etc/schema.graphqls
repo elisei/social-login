@@ -5,14 +5,9 @@ type Mutation {
         referer: String @doc(description: "Página de referência (account, checkout, cart)")
     ): VerificationCodeResponse @resolver(class: "O2TI\\SocialLogin\\Model\\Resolver\\RequestVerificationCode")
 
-    # Obtém o ID do cliente pelo email
-    getCustomerIdByEmail(
-        email: String! @doc(description: "Email do cliente para buscar o ID")
-    ): CustomerIdResponse @resolver(class: "O2TI\\SocialLogin\\Model\\Resolver\\GetCustomerIdByEmail")
-
     # Valida o código de verificação e realiza o login
     verifyCodeAndLogin(
-        customer_id: Int! @doc(description: "ID do cliente")
+        email: String! @doc(description: "Email do cliente")
         code: String! @doc(description: "Código de verificação recebido por email")
     ): VerifyCodeResponse @resolver(class: "O2TI\\SocialLogin\\Model\\Resolver\\VerifyCodeAndLogin")
 }
@@ -21,13 +16,6 @@ type Mutation {
 type VerificationCodeResponse @doc(description: "Resposta da solicitação de código de verificação") {
     success: Boolean! @doc(description: "Indica se a solicitação foi bem-sucedida")
     message: String @doc(description: "Mensagem de sucesso ou erro")
-}
-
-# Resposta para a consulta de ID do cliente
-type CustomerIdResponse @doc(description: "Resposta da consulta de ID do cliente") {
-    success: Boolean! @doc(description: "Indica se a consulta foi bem-sucedida")
-    customer_id: Int @doc(description: "ID do cliente, se encontrado")
-    message: String @doc(description: "Mensagem de erro, se houver")
 }
 
 # Resposta para a verificação de código e login

@@ -5,11 +5,6 @@
             <argument name="verifyCode" xsi:type="object">O2TI\SocialLogin\Model\VerifyCode</argument>
         </arguments>
     </type>
-    <type name="O2TI\SocialLogin\Model\Resolver\GetCustomerIdByEmail">
-        <arguments>
-            <argument name="verifyCode" xsi:type="object">O2TI\SocialLogin\Model\VerifyCode</argument>
-        </arguments>
-    </type>
     <type name="O2TI\SocialLogin\Model\Resolver\VerifyCodeAndLogin">
         <arguments>
             <argument name="verifyCode" xsi:type="object">O2TI\SocialLogin\Model\VerifyCode</argument>

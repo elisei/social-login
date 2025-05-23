@@ -50,23 +50,26 @@ class VerifyCodeAndLogin implements ResolverInterface
         array $value = null,
         array $args = null
     ) {
-        if (empty($args['customer_id'])) {
-            throw new GraphQlInputException(__('Customer ID is required.'));
+        if (empty($args['email'])) {
+            throw new GraphQlInputException(__('Email is required.'));
         }
 
         if (empty($args['code'])) {
             throw new GraphQlInputException(__('Verification code is required.'));
         }
 
-        $customerId = (int)$args['customer_id'];
+        $email = $args['email'];
         $code = (string)$args['code'];
 
         try {
-            $validationResult = $this->verifyCode->validateCode($customerId, $code);
+            $validationResult = $this->verifyCode->validateCodeByEmail($email, $code);
             
-            $this->verifyCode->loginCustomer($customerId);
+            $this->verifyCode->loginCustomer($validationResult['customer_id']);
 
-            $customerToken = $this->customerTokenGenerator->generateCustomerToken($customerId, $validationResult['email']);
+            $customerToken = $this->customerTokenGenerator->generateCustomerToken(
+                $validationResult['customer_id'], 
+                $validationResult['email']
+            );
 
             $referer = $validationResult['referer'] ?? 'account';
             $redirect = $this->getRedirectUrl($referer);

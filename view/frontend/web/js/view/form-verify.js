@@ -20,7 +20,6 @@ define([
         showingCodeVerificationForm: ko.observable(false),
         email: ko.observable(''),
         verificationCode: ko.observable(''),
-        customerId: ko.observable(''),
         message: ko.observable(''),
         isSuccess: ko.observable(false),
         isLoading: ko.observable(false),
@@ -68,13 +67,10 @@ define([
         
         /**
          * Show code verification form
-         * 
-         * @param {String} customerId
          */
-        showVerificationForm(customerId) {
+        showVerificationForm() {
             this.showingCodeRequestForm(false);
             this.showingCodeVerificationForm(true);
-            this.customerId(customerId);
             this.verificationCode('');
             
             setTimeout(() => {
@@ -87,7 +83,6 @@ define([
          */
         hideVerificationForm() {
             this.showingCodeVerificationForm(false);
-            this.customerId('');
             this.verificationCode('');
         },
         
@@ -119,25 +114,9 @@ define([
                 success: function(response) {
                     self.isLoading(false);
                     if (response.success) {
-                        console.log(response.success);
                         self.message(response.message);
                         self.isSuccess(true);
-                        
-                        // Get customer ID and show verification form
-                        $.ajax({
-                            url: '/sociallogin/ajax/customerid',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                email: self.email(),
-                                form_key: $.mage.cookies.get('form_key')
-                            },
-                            success: function(customerResponse) {
-                                if (customerResponse.success) {
-                                    self.showVerificationForm(customerResponse.customer_id);
-                                }
-                            }
-                        });
+                        self.showVerificationForm();
                     } else {
                         self.message(response.message);
                         self.isSuccess(false);
@@ -174,7 +153,7 @@ define([
                 type: 'POST',
                 dataType: 'json',
                 data: {
-                    customer_id: this.customerId(),
+                    email: this.email(),
                     code: this.verificationCode(),
                     form_key: $.mage.cookies.get('form_key')
                 },
