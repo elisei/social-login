@@ -78,6 +78,50 @@
                         <label>App Secret</label>
                     </field>
                 </group>
+                
+                <group id="verify_code" translate="label comment" type="text" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="40">
+                    <label>Verify Code</label>
+                    <depends>
+                        <field id="*/*/enabled">1</field>
+                    </depends>
+                    <field id="enabled" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enable</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="link_expiration" translate="label comment" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Link Expiration (hours)</label>
+                        <comment>Number of hours the verify code will be valid.</comment>
+                        <validate>validate-number validate-greater-than-zero</validate>
+                        <depends>
+                            <field id="enabled">1</field>
+                        </depends>
+                    </field>
+                    <group id="email_verify" translate="label comment" type="text" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="40">
+                        <label>Email for Verify Code</label>
+                        <field id="template" translate="label comment" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                            <label>Email Template</label>
+                            <comment>Email template chosen based on theme fallback when "Default" option is selected.</comment>
+                            <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                        </field>
+                        <field id="email_identity" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                            <label>Email Sender</label>
+                            <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                            <comment>Email sender identity for quote notifications</comment>
+                        </field>
+                        <field id="copy_to" translate="label comment" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Send Email Copy To</label>
+                            <comment>Comma-separated</comment>
+                            <validate>validate-email</validate>
+                        </field>
+                        <field id="copy_method" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                            <label>Send Email Copy Method</label>
+                            <source_model>Magento\Config\Model\Config\Source\Email\Method</source_model>
+                            <depends>
+                                <field id="copy_to">*</field>
+                            </depends>
+                        </field>
+                    </group>
+                </group>
             </group>
         </section>
     </system>

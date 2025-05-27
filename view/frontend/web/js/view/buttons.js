@@ -2,16 +2,31 @@
  * Copyright © 2019 O2TI. All rights reserved.
  * See LICENSE.txt for license details.
  */
-define(["ko", "uiComponent"], function (ko, Component) {
+define([
+    "ko", 
+    "uiComponent",
+    "uiRegistry"
+], function (ko, Component, registry) {
     "use strict";
 
     return Component.extend({
         isVisible: ko.observable(true),
-        initialize() {
+        
+        initialize: function() {
             this._super();
-            isVisible: ko.observable(this.data.socialLogin.enabled);
+            
+            if (this.data && this.data.socialLogin) {
+                this.isVisible(this.data.socialLogin.enabled);
+            }
+            
+            return this;
         },
-        isEnabled(provider) {
+        
+        isEnabled: function(provider) {
+            if (!this.data || !this.data.socialLogin || !this.data.socialLogin.providers) {
+                return false;
+            }
+            
             if (provider === "facebook") {
                 return this.data.socialLogin.providers.facebook;
             }
@@ -21,9 +36,25 @@ define(["ko", "uiComponent"], function (ko, Component) {
             if (provider === "WindowsLive") {
                 return this.data.socialLogin.providers.WindowsLive;
             }
+            if (provider === "verify_code") {
+                return this.data.socialLogin.providers.verify_code;
+            }
+            return false;
         },
-        getRedirectUrl(provider) {
+        
+        getRedirectUrl: function(provider) {
+            if (!this.data || !this.data.socialLogin) {
+                return '/sociallogin/endpoint/index/provider/' + provider;
+            }
             return this.data.socialLogin.redirectUrl + "provider/" + provider;
         },
+        
+        openVerifyCodeForm: function() {
+            var verifyCodeComponent = registry.get(this.name + '.form-verify-component');
+            
+            if (verifyCodeComponent) {
+                verifyCodeComponent.showCodeRequestForm();
+            }
+        }
     });
 });

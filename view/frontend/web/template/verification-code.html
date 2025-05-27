@@ -1,0 +1,79 @@
+<!--
+/**
+ * Copyright © O2TI. All rights reserved.
+ */
+-->
+<div class="block-verification-code">
+    <!-- Request Form -->
+    <!-- ko if: showingCodeRequestForm() || showingCodeVerificationForm() -->
+    <div class="step-title" role="title" data-bind="i18n: 'Login with Verification Code'"></div>
+    <p class="step-sub-title" role="title" data-bind="i18n: 'This method is exclusive to those who already have an account created.'"></p>
+    <!-- /ko -->
+    <!-- ko if: message() -->
+    <div class="messages">
+        <div class="message" data-bind="css: {'message-success success': isSuccess, 'message-error error': !isSuccess()}">
+            <div data-bind="text: message"></div>
+        </div>
+    </div>
+    <!-- /ko -->
+    <!-- ko if: showingCodeRequestForm() && !showingCodeVerificationForm() -->
+    <p class="step-sub-title" role="title" data-bind="i18n: 'Enter your Email for receive Verification Code.'"></p>
+    <div class="block-content" aria-labelledby="block-verification-code-heading">
+        <form id="code-request-form" class="form form-verification-code-request" data-bind="submit: submitCodeRequestForm">
+            <fieldset class="fieldset">
+                <div class="field theme-full-checkout-fields-floating-label">
+                    <div class="control">
+                        <div class="control-row">
+                            <div class="_additional-element-input">
+                                <input name="email" id="verify-code-email" type="email" class="input-text" 
+                                    data-bind="value: email, attr: {disabled: isLoading, placeholder: 'Email Address'}"
+                                    data-validate="{required:true, 'validate-email':true}">
+                                <label class="label" for="email"><span data-bind="i18n: 'Email Address'"></span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button type="submit" class="action submit primary" data-bind="attr: {disabled: isLoading}">
+                        <span data-bind="i18n: 'Send Verification Code'"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- /ko -->
+
+    <!-- Verification Form -->
+    <!-- ko if: showingCodeVerificationForm() -->
+    <p class="step-sub-title" role="title" data-bind="i18n: 'Enter Verification Code'"></p>
+    <div class="block-content" aria-labelledby="block-verification-form-heading">
+        <form id="code-verification-form" class="form form-verification-code" data-bind="submit: submitVerificationForm">
+            <fieldset class="fieldset">
+                <div class="field theme-full-checkout-fields-floating-label">
+                    <div class="control">
+                        <div class="control-row">
+                            <div class="_additional-element-input">
+                                <input name="code" id="verification-code" type="tel" class="input-text" 
+                                    data-bind="value: verificationCode, attr: {disabled: isLoading, maxlength: 6, minlength: 6, placeholder: 'Verification Code', pattern: '[0-9]' }"
+                                    data-validate="{required:true}">
+                                <label class="label" for="verification-code"><span data-bind="i18n: 'Verification Code'"></span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button type="submit" class="action submit primary" data-bind="attr: {disabled: isLoading}">
+                        <span data-bind="i18n: 'Verify and Login'"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- /ko -->
+</div>

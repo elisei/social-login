@@ -8,7 +8,27 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="content">
-            <block class="O2TI\SocialLogin\Block\Providers" name="sociallogin.login" template="O2TI_SocialLogin::social-login.phtml" before="-"/>
+            <block class="O2TI\SocialLogin\Block\Providers" name="sociallogin.login" template="O2TI_SocialLogin::social-login.phtml" before="-">
+                <arguments>
+                    <argument name="jsLayout" xsi:type="array">
+                        <item name="components" xsi:type="array">
+                            <item name="social-login-component" xsi:type="array">
+                                <item name="component" xsi:type="string">O2TI_SocialLogin/js/view/buttons</item>
+                                <item name="template" xsi:type="string">O2TI_SocialLogin/social-login</item>
+                                <item name="children" xsi:type="array">
+                                    <item name="form-verify-component" xsi:type="array">
+                                        <item name="component" xsi:type="string">O2TI_SocialLogin/js/view/form-verify</item>
+                                        <item name="displayArea" xsi:type="string">form-verify</item>
+                                        <item name="config" xsi:type="array">
+                                            <item name="type" xsi:type="string">customer</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </argument>
+                </arguments>
+            </block>
         </referenceContainer>
     </body>
 </page>
