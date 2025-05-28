@@ -5,6 +5,7 @@ Módulo para login social no Magento 2.
 ![Facebook](view/frontend/web/images/btn-facebook.svg) 
 ![Google](view/frontend/web/images/btn-google.svg) 
 ![WindowsLive](view/frontend/web/images/btn-windowslive.svg) 
+![Codigo](view/frontend/web/images/btn-verify-code.svg) 
 
 > Estado
 
@@ -28,6 +29,14 @@ Módulo para login social no Magento 2.
 *   Facebook
 *   Google
 *   Windows Live
+
+### Login com código
+
+Para quem já tem conta, pode ainda usar o login com "código de verificação". Nesse processo é enviado por email ao cliente um código de 6 dígitos, que deve ser informado para efetivar o login.
+
+#### Politica de Segurança
+
+Caso o usuário erre 3 vezes o código a conta do consumidor será bloqueada por 12 horas.
 
 ### Absorve o contexto do login/cadastro
 
