@@ -55,10 +55,14 @@ class Index extends Action
 
         $this->getResponse()->setHeader('Referrer-Policy', 'no-referrer');
 
-        $redirect = $response['redirectUrl'];
+        $redirect = $response['redirectUrl'] ?? '';
         
-        if (!preg_match('/^https?:\/\//', $redirect)) {
+        if ($redirect && !preg_match('/^https?:\/\//', $redirect)) {
             $redirect = $this->urlDecoder->decode($redirect);
+        }
+
+        if (!$redirect) {
+            $redirect = $this->_url->getUrl('customer/account');
         }
 
         // phpcs:ignore
