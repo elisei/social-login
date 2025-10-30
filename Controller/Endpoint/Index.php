@@ -28,12 +28,12 @@ class Index extends Action
     /**
      * @var RedirectFactory
      */
-    private $resultRedirectFactory;
+    protected $resultRedirectFactory;
 
     /**
      * @var ManagerInterface
      */
-    private $messageManager;
+    protected $messageManager;
 
     /**
      * Construct.
@@ -68,7 +68,7 @@ class Index extends Action
         $provider = $this->_request->getParam('provider');
         
         if (empty($provider)) {
-            $this->messageManager->addErrorMessage(__('Autenticação é obrigatória.'));
+            $this->messageManager->addErrorMessage(__('Provider is required.'));
             $resultRedirect = $this->resultRedirectFactory->create();
             return $resultRedirect->setPath('customer/account/login');
         }
