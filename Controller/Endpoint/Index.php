@@ -9,6 +9,8 @@ namespace O2TI\SocialLogin\Controller\Endpoint;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Url\DecoderInterface;
+use Magento\Framework\Controller\Result\RedirectFactory;
+use Magento\Framework\Message\ManagerInterface;
 use O2TI\SocialLogin\Provider\Provider;
 
 class Index extends Action
@@ -24,30 +26,53 @@ class Index extends Action
     protected $provider;
 
     /**
+     * @var RedirectFactory
+     */
+    private $resultRedirectFactory;
+
+    /**
+     * @var ManagerInterface
+     */
+    private $messageManager;
+
+    /**
      * Construct.
      *
-     * @param Context          $context
-     * @param Provider         $provider
+     * @param Context $context
+     * @param Provider $provider
      * @param DecoderInterface $urlDecoder
+     * @param RedirectFactory $resultRedirectFactory
+     * @param ManagerInterface $messageManager
      */
     public function __construct(
         Context $context,
         Provider $provider,
-        DecoderInterface $urlDecoder
+        DecoderInterface $urlDecoder,
+        RedirectFactory $resultRedirectFactory,
+        ManagerInterface $messageManager
     ) {
         parent::__construct($context);
         $this->provider = $provider;
         $this->urlDecoder = $urlDecoder;
+        $this->resultRedirectFactory = $resultRedirectFactory;
+        $this->messageManager = $messageManager;
     }
 
     /**
      * Dispatch request.
      *
-     * @return void
+     * @return \Magento\Framework\Controller\Result\Redirect
      */
     public function execute()
     {
         $provider = $this->_request->getParam('provider');
+        
+        if (empty($provider)) {
+            $this->messageManager->addErrorMessage(__('Autenticação é obrigatória.'));
+            $resultRedirect = $this->resultRedirectFactory->create();
+            return $resultRedirect->setPath('customer/account/login');
+        }
+
         $isSecure = $this->_request->isSecure();
         $referer = $this->_request->getParam('referer');
 
@@ -55,17 +80,12 @@ class Index extends Action
 
         $this->getResponse()->setHeader('Referrer-Policy', 'no-referrer');
 
-        $redirect = $response['redirectUrl'] ?? '';
+        $redirect = $response['redirectUrl'];
         
-        if ($redirect && !preg_match('/^https?:\/\//', $redirect)) {
+        if (!preg_match('/^https?:\/\//', $redirect)) {
             $redirect = $this->urlDecoder->decode($redirect);
         }
 
-        if (!$redirect) {
-            $redirect = $this->_url->getUrl('customer/account');
-        }
-
-        // phpcs:ignore
         return $this->_redirect($redirect);
     }
 }
