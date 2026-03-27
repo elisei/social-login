@@ -36,8 +36,8 @@ class RequestVerificationCode implements ResolverInterface
         Field $field,
         $context,
         ResolveInfo $info,
-        array $value = null,
-        array $args = null
+        ?array $value = null,
+        ?array $args = null
     ) {
         if (empty($args['email'])) {
             throw new GraphQlInputException(__('Email address is required.'));
