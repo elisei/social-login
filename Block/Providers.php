@@ -98,10 +98,10 @@ class Providers extends Template
         Session $session,
         UrlInterface $urlBuilder,
         EncoderInterface $urlEncoder,
-        DecoderInterface $urlDecoder = null,
-        HostChecker $hostChecker = null,
-        Json $serializer = null,
-        SecureHtmlRenderer $secureHtmlRenderer = null,
+        ?DecoderInterface $urlDecoder = null,
+        ?HostChecker $hostChecker = null,
+        ?Json $serializer = null,
+        ?SecureHtmlRenderer $secureHtmlRenderer = null,
         array $data = []
     ) {
         $this->scopeConfig = $scopeConfig;

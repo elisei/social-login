@@ -68,8 +68,8 @@ class CheckoutConfigProvider implements ConfigProviderInterface
         RequestInterface $request,
         UrlInterface $urlBuilder,
         EncoderInterface $urlEncoder,
-        DecoderInterface $urlDecoder = null,
-        HostChecker $hostChecker = null
+        ?DecoderInterface $urlDecoder = null,
+        ?HostChecker $hostChecker = null
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->request = $request;
