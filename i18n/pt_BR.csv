@@ -79,3 +79,5 @@ Google,Google
 "Send Email Copy To","Enviar Cópia do E-mail Para"
 Comma-separated,Separado por vírgulas
 "Send Email Copy Method","Método de Envio de Cópia do E-mail"
+"Subscribe New Accounts to Newsletter","Inscrever Novas Contas na Newsletter"
+"Automatically subscribe customers to the newsletter when their account is created through social login.","Inscreve automaticamente os clientes na newsletter quando a conta é criada pelo login social."

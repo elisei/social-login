@@ -22,6 +22,14 @@
                     <label>Enable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
+                <field id="auto_subscribe_newsletter" translate="label comment" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Subscribe New Accounts to Newsletter</label>
+                    <comment>Automatically subscribe customers to the newsletter when their account is created through social login.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
                 <group id="facebook" translate="label comment" type="text" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="10">
                     <label>Facebook</label>
                     <depends>

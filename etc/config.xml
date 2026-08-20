@@ -10,6 +10,7 @@
         <social_login>
             <general>
                 <enabled>1</enabled>
+                <auto_subscribe_newsletter>1</auto_subscribe_newsletter>
                 <verify_code>
                     <enabled>1</enabled>
                     <link_expiration>1</link_expiration>

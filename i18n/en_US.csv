@@ -79,3 +79,5 @@ Google,Google
 "Send Email Copy To","Send Email Copy To"
 Comma-separated,Comma-separated
 "Send Email Copy Method","Send Email Copy Method"
+"Subscribe New Accounts to Newsletter","Subscribe New Accounts to Newsletter"
+"Automatically subscribe customers to the newsletter when their account is created through social login.","Automatically subscribe customers to the newsletter when their account is created through social login."

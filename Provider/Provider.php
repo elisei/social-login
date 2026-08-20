@@ -29,6 +29,7 @@ use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\ResourceModel\Customer as CustomerResource;
+use O2TI\SocialLogin\Model\Service\NewsletterSubscriptionService;
 
 /**
  * Provider class for social login functionality
@@ -132,6 +133,11 @@ class Provider
     private $customerResource;
 
     /**
+     * @var NewsletterSubscriptionService
+     */
+    private $newsletterSubscriptionService;
+
+    /**
      * Constructor
      *
      * @param HybridauthFactory             $hybridauthFactory
@@ -151,6 +157,7 @@ class Provider
      * @param CookieMetadataFactory         $cookieMetadataFactory
      * @param CustomerUrl                   $customerUrl
      * @param CustomerResource              $customerResource
+     * @param NewsletterSubscriptionService $newsletterSubscriptionService
      */
     public function __construct(
         HybridauthFactory $hybridauthFactory,
@@ -169,7 +176,8 @@ class Provider
         CookieManagerInterface $cookieManager,
         CookieMetadataFactory $cookieMetadataFactory,
         CustomerUrl $customerUrl,
-        CustomerResource $customerResource
+        CustomerResource $customerResource,
+        NewsletterSubscriptionService $newsletterSubscriptionService
     ) {
         $this->hybridauthFactory = $hybridauthFactory;
         $this->url = $url;
@@ -188,6 +196,7 @@ class Provider
         $this->cookieMetadataFactory = $cookieMetadataFactory;
         $this->customerUrl = $customerUrl;
         $this->customerResource = $customerResource;
+        $this->newsletterSubscriptionService = $newsletterSubscriptionService;
     }
 
     /**
@@ -271,7 +280,9 @@ class Provider
     {
         try {
             $customer = $this->accountManagement->createAccount($customer);
-            
+
+            $this->newsletterSubscriptionService->subscribe($customer);
+
             if ($this->accountManagement->getConfirmationStatus($customer->getId()) ===
                 AccountManagementInterface::ACCOUNT_CONFIRMATION_REQUIRED) {
                 $this->messageManager->addComplexSuccessMessage(
